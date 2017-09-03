@@ -1,0 +1,1 @@
+{"url_unlock": "http://37.60.177.231/service/washing/unlock/?uid=", "url_upd": "http://37.60.177.231/service/washing/list-update/"}
