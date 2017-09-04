@@ -7,7 +7,7 @@ config = {}
 def configure(filename):
 	try:
 		with open(filename) as f:
-			data = json.load(f)
+			data = json.load(f, )
 		if (data.get('url_unlock') == None) or (data.get('url_upd') == None) :
 			raise Exception('Invalide content of config file')
 	except:
@@ -18,10 +18,9 @@ def configure(filename):
 		config = data
 		print "New configuration: ", config 
 
-def allowed_to_unlock(uid):
+def allowed_by_server(uid):
 	try:
 		global config
-		print config
 		url = config['url_unlock'] + uid
 		r = requests.get(url)
 		print 'Unlock request:', url
@@ -36,15 +35,33 @@ def allowed_to_unlock(uid):
 		print "Continuing working"
 	return False
 
+def allowed_by_list(uid):
+	try:
+		with open('access_list.txt') as f:
+			data = json.load(f, object_hook=date_hook)
+		for o in data:
+			if (o['uid'] == uid)\
+			and (o['date_start'].date() == datetime.date.today())\
+			and (o['time_start'].time() <= datetime.datetime.now().time())\
+			and (o['time_end'].time() >= datetime.datetime.now().time()):
+				return True
+	except:
+		print "Error processing access list: ", sys.exc_info()
+	return False
+
+def allowed_to_unlock(uid):
+	if allowed_by_list(uid) or allowed_by_server(uid):
+		return True
+	return False
 
 def date_hook(json_dict):
 	for (key, value) in json_dict.items():
 		try:
-			json_dict[key] = datetime.datetime.strptime(value, "datetime.date(%Y, %m, %d)")
+			json_dict[key] = datetime.datetime.strptime(value, "%Y-%m-%d")
 		except:
 			pass
 		try:
-			json_dict[key] = datetime.datetime.strptime(value, "datetime.time(%H, %M, %S)")
+			json_dict[key] = datetime.datetime.strptime(value, "%H:%M")
 		except:
 			pass
 	return json_dict
@@ -59,14 +76,13 @@ def update_list():
 		if r.status_code != 200:
 			raise Exception('Server error')
 		json_str = string.replace(r.text, "'", '"')
-		print json_str
+		f = open('access_list.txt','w')
+		f.write(json_str)
+		f.close()
+		print "Access list successfully updated"
 		data = json.loads(json_str, object_hook=date_hook)
 		return data
 	except:
 		print "Error asking server to update: ", sys.exc_info()
 		print "Continuing working"
 	return None
-
-configure('config.txt')
-print allowed_to_unlock('12345')
-print update_list()
