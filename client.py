@@ -76,9 +76,8 @@ def update_list():
 		if r.status_code != 200:
 			raise Exception('Server error')
 		json_str = string.replace(r.text, "'", '"')
-		f = open('access_list.txt','w')
-		f.write(json_str)
-		f.close()
+		with open('access_list.txt', 'w') as f:
+			f.write(json_str)
 		print "Access list successfully updated"
 		data = json.loads(json_str, object_hook=date_hook)
 		return data
