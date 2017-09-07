@@ -1,0 +1,4 @@
+*.paw
+*.pyc
+*.txt
+http_lib.py
