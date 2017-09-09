@@ -12,6 +12,7 @@ def configure(filename):
 			data = json.load(f)
 		if (data.get('url_unlock') == None) or (data.get('url_upd') == None) :
 			raise Exception('Invalide content of config file')
+		update_list()
 	except:
 		lcd_lib.print_lcd('Configuration error')
 		print "Error processing config file: ", sys.exc_info()
@@ -54,6 +55,8 @@ def allowed_by_list(uid):
 	except:
 		lcd_lib.print_lcd('Database error')
 		print "Error processing access list: ", sys.exc_info()
+		update_list()
+
 	return False
 
 def allowed_by_admin(uid):
@@ -70,9 +73,9 @@ def allowed_by_admin(uid):
 
 def allowed_to_unlock(uid):
 	if allowed_by_list(uid) or allowed_by_admin(uid) or allowed_by_server(uid):
-		lcd_lib.print_lcd('Welcome')
+		#lcd_lib.print_lcd('Welcome')
 		return True
-	lcd_lib.print_lcd('You shall not pass')
+	#lcd_lib.print_lcd('You shall not pass')
 	return False
 
 def date_hook(json_dict):

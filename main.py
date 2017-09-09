@@ -2,6 +2,8 @@
 from client import *
 from lcd_lib import *
 from rfid_lib import *
+import sys
+import RPi.GPIO as GPIO
 from time import sleep
 
 def uid_to_str(uid):
@@ -9,13 +11,49 @@ def uid_to_str(uid):
 
 configure('config.txt')
 
-while 1:
-	err, uid = wait_card()
-	print uid_to_str(uid)
-	print_lcd ("alowed to unlock\n" + str(allowed_to_unlock(uid_to_str(uid))))
-	sleep(5)
+last_uid = []
+same_uid_counter = 0
+uid = []
 
-#print_lcd ("allowed to unlock\n" + str(allowed_to_unlock('136.52.198.107.1')))
-#sleep(5)
-#print_lcd ("allowed to unlock\n" + str(allowed_to_unlock('1234')))
-#sleep(5)
+print_lcd("READY")
+sleep(1)
+
+try:
+
+	while 1:
+		print_lcd("PLACE CARD \n ON READER")
+
+		last_uid = uid
+
+		while 1:
+			err, uid = wait_card(15*60)
+			if err: update_list() 
+			else: break
+	
+		same_uid_counter = (same_uid_counter + 1) * int(uid == last_uid)
+	
+		print uid_to_str(uid)
+
+		if allowed_to_unlock(uid_to_str(uid)):
+			print_lcd("YOU ARE WELCOME")
+		else:
+			if   same_uid_counter == 0:
+				print_lcd("access denied\ntry again :)")
+			elif same_uid_counter == 1:
+				print_lcd("access denied\nsorry :(")
+			elif same_uid_counter == 2:
+				print_lcd("access denied\nyou may go...")
+			elif same_uid_counter == 3:
+				print_lcd("access denied\nwhat's now?!")
+			elif same_uid_counter == 4:
+				print_lcd("ACCESS DENIED!!!\nplease go away:(")
+			elif same_uid_counter == 5:
+				print_lcd("goodbye _|___|_\n /(^_^)/")
+			elif same_uid_counter > 5:
+				print_lcd("  FUCK\n      OFF")
+		sleep(1.5)
+except:
+	print_lcd("ERR: MAIN LOOP\n EXCEPTION")
+	print "MAIN LOOP EXCEPTION: ", sys.exc_info()
+	rfid_cleanup()
+	GPIO.cleanup()
