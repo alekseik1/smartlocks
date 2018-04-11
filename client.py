@@ -2,6 +2,8 @@ import requests
 import json, string, datetime
 import sys
 import lcd_lib
+import time
+from threading import Thread
 from http_lib import *
 
 config = {}
@@ -10,9 +12,8 @@ def configure(filename):
 	try:
 		with open(filename) as f:
 			data = json.load(f)
-		if (data.get('url_unlock') == None) or (data.get('url_upd') == None) :
+		if (data.get(u'url_unlock') == None) or (data.get(u'url_upd') == None) :
 			raise Exception('Invalide content of config file')
-		update_list()
 	except:
 		lcd_lib.print_lcd('Configuration error')
 		print "Error processing config file: ", sys.exc_info()
@@ -26,12 +27,12 @@ def configure(filename):
 def allowed_by_server(uid):
 	try:
 		global config, ser1, ser2, ser3
-		url = config['url_unlock'] + uid
+		url = config[u'url_unlock'] + uid
 		r = requests.get(url)
 		print 'Unlock request:', url
 		print 'response status code', r.status_code
 		print r.text
-		if uid == ser1 or uid == ser2 or uid == ser3: return True
+
 		if r.status_code != 200:
 			raise Exception('Server error')
 		if (r.text == 'yes'):
@@ -72,6 +73,8 @@ def allowed_by_admin(uid):
 	return False
 
 def allowed_to_unlock(uid):
+	global ser1, ser2, ser3
+	if uid == ser1 or uid == ser2 or uid == ser3: return True
 	if allowed_by_list(uid) or allowed_by_admin(uid) or allowed_by_server(uid):
 		#lcd_lib.print_lcd('Welcome')
 		return True
@@ -93,7 +96,7 @@ def date_hook(json_dict):
 def update_list():
 	try:
 		global config
-		url = config['url_upd']
+		url = config[u'url_upd']
 		r = requests.get(url)
 		print 'Update request:', url
 		print 'response status code', r.status_code
@@ -110,3 +113,17 @@ def update_list():
 		print "Error asking server to update: ", sys.exc_info()
 		print "Continuing working"
 	return None
+
+
+class update_thread(Thread):
+	def __init__(self):
+		Thread.__init__(self)
+		self.name = "list update thread"
+
+	def run(self):
+		while 1:
+			update_list()
+			time.sleep(15 * 60)
+
+update_thr = update_thread()
+

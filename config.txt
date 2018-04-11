@@ -1,1 +1,1 @@
-{"url_unlock": "http://37.60.177.231/service/washing/unlock/?uid=", "url_upd": "http://37.60.177.231/service/washing/list-update/"}
+{"url_unlock": "http://frtk.mipt.ru/services/washing1/unlock/?uid=", "url_upd": "http://frtk.mipt.ru/services/washing1/list-update/"}
