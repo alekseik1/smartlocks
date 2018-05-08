@@ -44,6 +44,7 @@ def allowed_by_server(uid):
 	return False
 
 def allowed_by_list(uid):
+	print "Asking list"
 	try:
 		with open('access_list.txt') as f:
 			data = json.load(f, object_hook=date_hook)
@@ -74,7 +75,7 @@ def allowed_by_admin(uid):
 
 def allowed_to_unlock(uid):
 	global ser1, ser2, ser3
-	if uid == ser1 or uid == ser2 or uid == ser3: return True
+	if uid in lst: return True
 	if allowed_by_list(uid) or allowed_by_admin(uid) or allowed_by_server(uid):
 		#lcd_lib.print_lcd('Welcome')
 		return True
@@ -119,6 +120,7 @@ class update_thread(Thread):
 	def __init__(self):
 		Thread.__init__(self)
 		self.name = "list update thread"
+		configure("config.txt")
 
 	def run(self):
 		while 1:

@@ -13,10 +13,9 @@ print_lcd("READY")
 sleep(1)
 
 try:
-	configure("config.txt")
 	door_init()
 	door_close()
-	door_test_thr.start()
+#	door_test_thr.start()
 	update_thr.start()
 	rfid_thr.start()
 	button_thr.start()
