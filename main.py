@@ -4,15 +4,14 @@ from lcd_lib import *
 from rfid_lib import *
 from button import *
 from door import *
+from log_writing import *
 
 import sys
 import RPi.GPIO as GPIO
 from time import sleep
 
-print_lcd("READY")
-sleep(1)
-
 try:
+	print_log("STARTUP")
 	door_init()
 	door_close()
 #	door_test_thr.start()

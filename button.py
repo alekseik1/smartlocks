@@ -2,6 +2,7 @@ from door import *
 import RPi.GPIO as GPIO
 import time
 from threading import Thread
+from log_writing import *
 
 GPIO.setmode(GPIO.BCM)
 
@@ -25,9 +26,11 @@ class button_thread(Thread):
 	def run(self):
 		while 1:
 			GPIO.wait_for_edge(BUTTON_PIN, GPIO.RISING)
+			print_log(">->->->->BUTTON PRESSED EVENT<-<-<-<-<")
 			door_open()
 			time.sleep(3)
 			door_close()
+			print_log("<-<-<-<-<BUTTON PRESSED EVENT>->->->->\n")
 
 
 button_thr = button_thread()

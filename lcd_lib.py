@@ -1,4 +1,5 @@
 import sys
+from log_writing import *
 try: 
 	import Adafruit_CharLCD as LCD
 # Raspberry Pi pin configuration:
@@ -18,12 +19,12 @@ try:
 	lcd = LCD.Adafruit_CharLCD(lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lcd_d7,
                            lcd_columns, lcd_rows, lcd_backlight)
 except:
-	print "ERROR WHILE INITIALISING RFID MODULE", sys.exc_info()
+	print_log("ERROR WHILE INITIALISING RFID MODULE" + str(sys.exc_info()))
 
 def print_lcd(s):
 	try:
 		lcd.clear()
 		lcd.message(s)
 	except:
-		print "ERROR MESSAGING ON LCD", sys.exc_info()
+		print_log("ERROR MESSAGING ON LCD"  + str(sys.exc_info()))
 

@@ -40,36 +40,24 @@ def allowed_by_server(uid):
 		if r.status_code != 200:
 			raise Exception('Server error')
 		if (r.text == 'yes'):
-			return (True, "not_defined")
-		if (r.text == "no") :
-			return (False, "not_defined")
-
-		resp = json.loads(r.text)
-		print_log("name: " + resp["name"])
-		if resp["status"] == "yes":
-			return (True, resp["cause"])
-		else:
-			return (False, resp["cause"])
-
+			return True
 	except:
 		lcd_lib.print_lcd('Network error')
 		print_log("Error asking server to unlock: " + str(sys.exc_info()))
 		print_log("Continuing working")
-	return (False, "error")
+	return False
 
 def allowed_by_list(uid):
 	print_log("Asking list")
 	try:
 		with open('access_list.txt') as f:
 			data = json.load(f, object_hook=date_hook)
-
 		for o in data:
 			if (o['uid'] == uid)\
 			and (o['date_start'].date() == datetime.date.today())\
 			and (o['time_start'].time() <= datetime.datetime.now().time())\
 			and (o['time_end'].time() >= datetime.datetime.now().time()):
 				print_log("access granted")
-				print_log("name: " + o["name"])
 				return True
 	except:
 		lcd_lib.print_lcd('Database error')
@@ -113,31 +101,26 @@ def write_one_time_set(set):
 
 
 def allowed_to_unlock(uid):
-	if uid in lst: return (True, "because")
+	if uid in lst: return True
 	if allowed_by_admin(uid):
-		return (True, "admin")
+		return True
 
 	one_time_set = read_one_time_set()
-
 	if allowed_by_list(uid):
 		if not  uid in one_time_set:
 			one_time_set.add(uid)
-			write_one_time_set(one_time_set)
-		return (True, "list")
+		return True
 
-	status, cause = allowed_by_server(uid)
-	if status:
+	if allowed_by_server(uid):
 		if not  uid in one_time_set:
 			one_time_set.add(uid)
-			write_one_time_set(one_time_set)
-		return (True, cause)
+		return True
 
 	if uid in one_time_set:
 		one_time_set.remove(uid)
-		write_one_time_set(one_time_set)
-		return (True, "last_time")
+		return True
 
-	return (False, cause)
+	return False
 
 def date_hook(json_dict):
 	for (key, value) in json_dict.items():
@@ -181,9 +164,7 @@ class update_thread(Thread):
 	def run(self):
 		configure("config.txt")
 		while 1:
-			print_log(">->->->->LIST UPDATE EVENT<-<-<-<-<")
 			update_list()
-			print_log("<-<-<-<-<LIST UPDATE EVENT>->->->->\n")
 			time.sleep(15 * 60)
 
 update_thr = update_thread()

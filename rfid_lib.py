@@ -8,6 +8,7 @@ from client import*
 from lcd_lib import*
 from time import *
 from door import *
+from log_writing import *
 
 from threading import Thread
 
@@ -17,12 +18,12 @@ try:
 	from time import clock
 	rdr = RFID(pin_rst = 1, pin_irq = 0, pin_mode = RPi.GPIO.BCM)
 except:
-	print "ERROR INITIALISING RFID MODULE: ", sys.exc_info()
+	print_log("ERROR INITIALISING RFID MODULE: " + str(sys.exc_info()))
 
 def wait_card(timeout = -1):
 	err = 1
 	start_time = clock()
-	uid = [-1, -1, -1, -1, -1]
+	uid = []
 	try:
         	while err:
                 	(err, tt) = rdr.request()
@@ -34,7 +35,7 @@ def wait_card(timeout = -1):
 			sleep(0.1)
 		return err, uid
 	except:
-		print "ERROR IN RFID MODULE: ", sys.exc_info()
+		print_log("ERROR IN RFID MODULE: " + str(sys.exc_info()))
 		print_lcd("RFID MODULE\n ERROR")
 		return RFID_ERR_CODE, uid
 
@@ -42,11 +43,16 @@ def rfid_cleanup():
 	try:
 		rdr.cleanup()
 	except:
-		print "RFID CLEANUP ERROR: ", sys.exc_info()
+		print_log("RFID CLEANUP ERROR: " + str(sys.exc_info()))
 
 def uid_to_str(uid):
-        return str(uid[0]) + "." + str(uid[1]) + "." + str(uid[2]) + "." + str(uid[3]) + "." + str(uid[4])
-
+	#MIFARE CLASSIC
+        return str(uid[0]) + "." + str(uid[1]) + "." + str(uid[2]) + "." + str(uid[3])
+	#s = ''
+	#for b in uid[:-1]:
+	#	s += str(b) + "."
+	#s += str(uid[len(uid)-1])
+	#return s
 
 class rfid_thread(Thread):
 	def __init__(self):
@@ -65,32 +71,47 @@ class rfid_thread(Thread):
                 	last_uid = uid
 
 			err,uid = wait_card()
+			try:
 
-	                same_uid_counter = (same_uid_counter + 1) * int(uid == last_uid)
+	                	same_uid_counter = (same_uid_counter + 1) * int(uid == last_uid)
+				print_log(">->->->->RFID EVENT<-<-<-<-<")
+        	      		print_log(uid_to_str(uid))
 
-        	        print uid_to_str(uid)
+	                	status, cause = allowed_to_unlock(uid_to_str(uid))
+				print_log("got result to unlock: " + str(status) +" "+ str(cause))
+				if status:
+					if cause == "admin":
+						print_lcd(get_ip())
+					elif cause == "last_time":
+						print_lcd("IT IS YOUR\n LAST ENTER")
+					else:
+						print_lcd("YOU ARE WELCOME")
+					door_open()
+					sleep(3)
+					door_close()
+              			else:
+					if   cause == "unknown_user":
+						print_lcd("please register\n your card")
+					elif same_uid_counter == 0:
+                        	        	print_lcd("access denied\ntry again :)")
+         	               		elif same_uid_counter == 1:
+                	                	print_lcd("access denied\nsorry :(")
+	                        	elif same_uid_counter == 2:
+	                                	print_lcd("access denied\nyou may go...")
+	                        	elif same_uid_counter == 3:
+	                                	print_lcd("access denied\nwhat's now?!")
+	                        	elif same_uid_counter == 4:
+	                                	print_lcd("ACCESS DENIED!!!\nplease go away:(")
+	                        	elif same_uid_counter == 5:
+	                                	print_lcd("goodbye _|___|_\n /(^_^)/")
+	                        	elif same_uid_counter > 5:
+	                               		print_lcd("  FUCK\n      OFF")
+	                		sleep(1.5)
+				print_log("<-<-<-<-<RFID EVENT>->->->->\n")
 
-	                if allowed_to_unlock(uid_to_str(uid)):
-        	                print_lcd("YOU ARE WELCOME")
+			except:
 				door_open()
+				print_log("ERROR in rfig thread")
 				sleep(3)
 				door_close()
-              		else:
-				if   same_uid_counter == 0:
-                        	        print_lcd("access denied\ntry again :)")
-         	               	elif same_uid_counter == 1:
-                	                print_lcd("access denied\nsorry :(")
-	                        elif same_uid_counter == 2:
-	                                print_lcd("access denied\nyou may go...")
-	                        elif same_uid_counter == 3:
-	                                print_lcd("access denied\nwhat's now?!")
-	                        elif same_uid_counter == 4:
-	                                print_lcd("ACCESS DENIED!!!\nplease go away:(")
-	                        elif same_uid_counter == 5:
-	                                print_lcd("goodbye _|___|_\n /(^_^)/")
-	                        elif same_uid_counter > 5:
-	                                print_lcd("  FUCK\n      OFF")
-	                	sleep(1.5)
-
-
 rfid_thr = rfid_thread()
