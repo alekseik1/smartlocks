@@ -1,0 +1,9 @@
+#! /bin/bash
+
+#installs smartlocks
+apt install python-pip
+pip install requests
+pip install spidev
+pip install RPi.GPIO
+pip install pi-rc522
+cp startup_script /etc/rc.local

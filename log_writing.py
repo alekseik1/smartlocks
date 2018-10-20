@@ -1,7 +1,7 @@
 import time
 import sys
 
-LOGS_PATH = "/home/pi/RPi_Washing/logs"
+LOGS_PATH = "/home/pi/smartlocks/logs"
 
 def print_log(s):
 	try:
