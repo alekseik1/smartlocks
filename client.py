@@ -1,4 +1,5 @@
 import datetime
+import time
 import json
 import random
 import string
@@ -182,9 +183,10 @@ def update_list():
         print_log('response status code: ' + str(r.status_code))
         if r.status_code != 200:
             raise Exception('Server error')
+        data_str = r.text.replace('\'', '\"')
         data = json.loads(r.text, object_hook=date_hook)
-        # with open('access_list.txt', 'w') as f:
-        #     f.write(json.dumps(data))
+        with open('access_list.txt', 'w') as f:
+            f.write(data_str)
         print_log("Access list successfully updated")
         return data
     except:
