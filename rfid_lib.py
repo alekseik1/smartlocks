@@ -9,6 +9,7 @@ from lcd_lib import*
 from time import *
 from door import *
 from log_writing import *
+from hw_lock import *
 
 from threading import Thread
 
@@ -26,17 +27,20 @@ def wait_card(timeout = -1):
 	uid = []
 	try:
         	while err:
+			hw_acq("rfid read")
                 	(err, tt) = rdr.request()
 			if not err:
 				(err, uid) = rdr.anticoll()
-			if timeout > 0 and clock() - start_time > timeout: 
+			if timeout > 0 and clock() - start_time > timeout:
 				break
 				err = TIMEOUT_CODE
+			hw_rel("rfid read")
 			sleep(0.1)
 		return err, uid
 	except:
 		print_log("ERROR IN RFID MODULE: " + str(sys.exc_info()))
 		print_lcd("RFID MODULE\n ERROR")
+		hw_lock.release()
 		return RFID_ERR_CODE, uid
 
 def rfid_cleanup():
@@ -84,6 +88,8 @@ class rfid_thread(Thread):
 						print_lcd(get_ip())
 					elif cause == "last_time":
 						print_lcd("IT IS YOUR\n LAST ENTER")
+					elif cause == "random":
+						print_lcd("SO LUCKY TODAY") 
 					else:
 						print_lcd("YOU ARE WELCOME")
 					door_open()
@@ -105,7 +111,7 @@ class rfid_thread(Thread):
 	                        	elif same_uid_counter == 5:
 	                                	print_lcd("goodbye _|___|_\n /(^_^)/")
 	                        	elif same_uid_counter > 5:
-	                               		print_lcd("  FUCK\n      OFF")
+	                               		print_lcd("ACCESS DENIED")
 	                		sleep(1.5)
 				print_log("<-<-<-<-<RFID EVENT>->->->->\n")
 

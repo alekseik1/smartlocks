@@ -1,7 +1,8 @@
 import requests
 import json, string, datetime
 import sys
-import lcd_lib
+import random
+from lcd_lib import *
 import time
 from threading import Thread
 from http_lib import *
@@ -19,13 +20,13 @@ def configure(filename):
 		if (data.get(u'url_unlock') == None) or (data.get(u'url_upd') == None) :
 			raise Exception('Invalid content of config file')
 	except:
-		lcd_lib.print_lcd('Configuration error')
+		print_lcd('Configuration error')
 		print_log("Error processing config file: " + str(sys.exc_info()))
 		print_log("Continuing working in an old way")
 	else:
 		global  config
 		config = data
-		lcd_lib.print_lcd('Configured')
+		print_lcd('Configured')
 		print_log("New configuration: " + str(config)) 
 
 def allowed_by_server(uid):
@@ -52,7 +53,7 @@ def allowed_by_server(uid):
 			return (False, resp["cause"])
 
 	except:
-		lcd_lib.print_lcd('Network error')
+		print_lcd('Network error')
 		print_log("Error asking server to unlock: " + str(sys.exc_info()))
 		print_log("Continuing working")
 	return (False, "error")
@@ -72,7 +73,7 @@ def allowed_by_list(uid):
 				print_log("name: " + o["name"])
 				return True
 	except:
-		lcd_lib.print_lcd('Database error')
+		print_lcd('Database error')
 		print_log("Error processing access list: " + str(sys.exc_info()))
 		update_list()
 	print_log("no access")
@@ -86,8 +87,13 @@ def allowed_by_admin(uid):
 					print_log("Welcome, Admin Adminovich")
 					return True
 	except:
-		lcd_lib.print_lcd('Local error')
+		print_lcd('Local error')
 		print_log("Error processing admin list" + str( sys.exc_info()))
+	return False
+
+def allowed_by_random(p):
+	if random.random() < p:
+		return True
 	return False
 
 def read_one_time_set():
@@ -137,6 +143,9 @@ def allowed_to_unlock(uid):
 		write_one_time_set(one_time_set)
 		return (True, "last_time")
 
+	if allowed_by_random(0.05):
+		return (True, "random")
+
 	return (False, cause)
 
 def date_hook(json_dict):
@@ -167,7 +176,7 @@ def update_list():
 		data = json.loads(json_str, object_hook=date_hook)
 		return data
 	except:
-		lcd_lib.print_lcd('Network error')
+		print_lcd('Network error')
 		print_log("Error asking server to update: " + str(sys.exc_info()))
 		print_log("Continuing working")
 	return None

@@ -5,15 +5,18 @@ from rfid_lib import *
 from button import *
 from door import *
 from log_writing import *
+from hw_lock import *
 
 import sys
 import RPi.GPIO as GPIO
 from time import sleep
 
 try:
+	DEBUG_ON_ = False
 	print_log("STARTUP")
 	door_init()
 	door_close()
+#	hw_acq("main stop")
 #	door_test_thr.start()
 	update_thr.start()
 	rfid_thr.start()

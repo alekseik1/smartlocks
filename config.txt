@@ -1,1 +1,1 @@
-{"url_unlock": "http://frtk.mipt.ru/services/washing/unlock/?uid=", "url_upd": "http://frtk.mipt.ru/services/washing/list-update/"}
+{"url_unlock": "http://8ka.mipt.ru/services/washing/2/unlock/?uid=", "url_upd": "http://8ka.mipt.ru/services/washing/2/list-update/"}

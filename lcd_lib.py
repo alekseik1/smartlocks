@@ -1,9 +1,10 @@
 import sys
 from log_writing import *
-try: 
+from hw_lock import *
+try:
 	import Adafruit_CharLCD as LCD
 # Raspberry Pi pin configuration:
-	lcd_rs        = 25 
+	lcd_rs        = 25
 	lcd_en        = 24
 	lcd_d4        = 23
 	lcd_d5        = 17
@@ -23,8 +24,11 @@ except:
 
 def print_lcd(s):
 	try:
+		hw_acq("lcd print")
 		lcd.clear()
 		lcd.message(s)
 	except:
 		print_log("ERROR MESSAGING ON LCD"  + str(sys.exc_info()))
+	finally:
+		hw_rel("lcd print")
 

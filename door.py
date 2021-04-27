@@ -2,6 +2,7 @@ import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BCM)
 import time
 from log_writing import *
+from hw_lock import*
 
 MAGNET_PIN = 5
 DETECTOR_PIN = 6
@@ -11,12 +12,18 @@ def door_init():
 	GPIO.setup(DETECTOR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 def door_open():
+	hw_acq("door open")
 	print_log("door opened")
 	GPIO.output(MAGNET_PIN, 0)
+	time.sleep(0.5)
+	hw_rel("door open")
 
 def door_close():
+	hw_acq("door close")
 	print_log("door closed")
 	GPIO.output(MAGNET_PIN, 1)
+	time.sleep(0.5)
+	hw_rel("door close")
 
 from threading import Thread
 
