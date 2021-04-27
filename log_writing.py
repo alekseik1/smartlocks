@@ -1,13 +1,8 @@
-import sys
-import time
+import datetime
+from loguru import logger
 
-LOGS_PATH = "/home/pi/smartlocks/logs"
+logger.add('logs/log_{time}.log', rotation=datetime.timedelta(days=1))
 
 
 def print_log(s):
-    try:
-        f = open(LOGS_PATH, "a")
-        f.write(time.asctime(time.localtime()) + ": " + s + "\n")
-        f.close()
-    except:
-        print("log writing error", sys.exc_info())
+    logger.info(s)
