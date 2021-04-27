@@ -1,9 +1,10 @@
 from threading import Thread
 
 import RPi.GPIO as GPIO
+import time
 
-from door import *
-from log_writing import *
+from door import door_open, door_close
+from log_writing import print_log
 
 GPIO.setmode(GPIO.BCM)
 

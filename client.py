@@ -182,11 +182,10 @@ def update_list():
         print_log('response status code: ' + str(r.status_code))
         if r.status_code != 200:
             raise Exception('Server error')
-        json_str = string.replace(r.text, "'", '"')
-        with open('access_list.txt', 'w') as f:
-            f.write(json_str)
+        data = json.loads(r.text, object_hook=date_hook)
+        # with open('access_list.txt', 'w') as f:
+        #     f.write(json.dumps(data))
         print_log("Access list successfully updated")
-        data = json.loads(json_str, object_hook=date_hook)
         return data
     except:
         print_lcd('Network error')

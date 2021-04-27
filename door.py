@@ -1,7 +1,9 @@
 import RPi.GPIO as GPIO
 
 GPIO.setmode(GPIO.BCM)
-from hw_lock import *
+from hw_lock import hw_acq, hw_rel
+import time
+from log_writing import print_log
 
 MAGNET_PIN = 5
 DETECTOR_PIN = 6

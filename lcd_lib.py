@@ -1,4 +1,6 @@
-from hw_lock import *
+from hw_lock import hw_rel, hw_acq
+import sys
+from log_writing import print_log
 
 try:
     import Adafruit_CharLCD as LCD

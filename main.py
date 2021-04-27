@@ -3,10 +3,12 @@ import sys
 
 import RPi.GPIO as GPIO
 
-from button import *
-from door import *
-from hw_lock import *
-from rfid_lib import *
+from button import button_thr
+from door import door_init, door_close
+from client import update_thr
+from rfid_lib import rfid_thr, rfid_cleanup
+from lcd_lib import print_lcd
+from log_writing import print_log
 
 try:
     DEBUG_ON_ = False

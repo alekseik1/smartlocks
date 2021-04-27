@@ -1,6 +1,6 @@
 import threading
 
-from log_writing import *
+from log_writing import print_log
 
 hw_lock = threading.Lock()
 
