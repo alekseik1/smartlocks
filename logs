@@ -1,9 +1,0 @@
-Sat Oct 20 23:23:46 2018: STARTUP
-Sat Oct 20 23:23:46 2018: door closed
-Sat Oct 20 23:23:47 2018: New configuration: {u'url_unlock': u'http://frtk.mipt.ru/services/washing/unlock/?uid=', u'url_upd': u'http://frtk.mipt.ru/services/washing/list-update/'}
-Sat Oct 20 23:23:47 2018: >->->->->LIST UPDATE EVENT<-<-<-<-<
-Sat Oct 20 23:23:47 2018: Update request:http://frtk.mipt.ru/services/washing/list-update/
-Sat Oct 20 23:23:47 2018: response status code: 200
-Sat Oct 20 23:23:47 2018: Access list successfully updated
-Sat Oct 20 23:23:47 2018: <-<-<-<-<LIST UPDATE EVENT>->->->->
-
