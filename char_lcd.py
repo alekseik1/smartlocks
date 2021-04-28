@@ -26,7 +26,10 @@ if __name__ == '__main__':
     logger.debug('(DONE) Initializing LCD')
 
     try:
-        lcd.message(sys.argv[1] + '\n')
-        lcd.message(sys.argv[2])
+        message = input('Enter LCD message\n')
+        while message != '0':
+            logger.debug(f'sending message: {message}')
+            lcd.message(message)
+            message = input()
     except:
         pass
