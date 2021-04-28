@@ -34,12 +34,12 @@ def wait_card(timeout=-1):
             (err, tt) = rdr.request()
             if not err:
                 (err, uid) = rdr.anticoll()
+            hw_rel("rfid read")
             logger.debug(f'rfid found card: {tt} with error {err}')
             if tt is not None:
                 return err, uid
             if timeout > 0 and clock() - start_time > timeout:
                 break
-            hw_rel("rfid read")
             logger.debug('rfid read took: {} seconds'.format(clock() - _), 'debug')
             sleep(2)
         return err, uid
