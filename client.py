@@ -123,7 +123,7 @@ def read_one_time_set():
 def write_one_time_set(set):
     try:
         logger.info("writing one time set")
-        with open("one_time_set", "wb") as f:
+        with open("one_time_set", "w") as f:
             json.dump(list(set), f)
         logger.info("(DONE) writing one time set")
     except IOError as e:
