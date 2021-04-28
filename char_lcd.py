@@ -18,14 +18,15 @@ lcd_backlight = 4
 lcd_columns = 16
 lcd_rows = 2
 
-# Initialize the LCD using the pins above.
-logger.debug('Initializing LCD')
-lcd = LCD.Adafruit_CharLCD(lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lcd_d7,
-                           lcd_columns, lcd_rows, lcd_backlight)
-logger.debug('(DONE) Initializing LCD')
+if __name__ == '__main__':
+    # Initialize the LCD using the pins above.
+    logger.debug('Initializing LCD')
+    lcd = LCD.Adafruit_CharLCD(lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lcd_d7,
+                               lcd_columns, lcd_rows, lcd_backlight)
+    logger.debug('(DONE) Initializing LCD')
 
-try:
-    lcd.message(sys.argv[1] + '\n')
-    lcd.message(sys.argv[2])
-except:
-    pass
+    try:
+        lcd.message(sys.argv[1] + '\n')
+        lcd.message(sys.argv[2])
+    except:
+        pass
