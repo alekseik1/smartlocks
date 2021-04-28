@@ -32,7 +32,6 @@ def configure(filename):
     else:
         global config
         config = data
-        print_lcd('Configured')
         logger.debug(f"new configuration: {config}")
 
 
