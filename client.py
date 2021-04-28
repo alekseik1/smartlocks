@@ -144,7 +144,7 @@ def allowed_to_unlock(uid):
         if not uid in one_time_set:
             one_time_set.add(uid)
             write_one_time_set(one_time_set)
-        logger.info('allowed, in one-time list')
+        logger.info('allowed, in local access_list.txt list')
         return True, "list"
 
     status, cause = allowed_by_server(uid)

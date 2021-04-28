@@ -128,9 +128,9 @@ class rfid_thread(Thread):
                     sleep(1.5)
                 logger.info("(DONE) processing detected card: {}".format(uid_str))
 
-            except:
+            except Exception as e:
                 door_open()
-                logger.error("error in rfig thread")
+                logger.error(f"error in rfig thread {e}")
                 # TODO: заправить на TIMEOUT
                 sleep(3)
                 door_close()
