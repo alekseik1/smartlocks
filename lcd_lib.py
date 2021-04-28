@@ -1,6 +1,6 @@
 from hw_lock import hw_rel, hw_acq
 import sys
-from log_writing import print_log
+from loguru import logger
 
 try:
     import Adafruit_CharLCD as LCD
@@ -19,18 +19,21 @@ try:
     lcd_rows = 2
 
     # Initialize the LCD using the pins above.
+    logger.debug('initializing lcd module')
     lcd = LCD.Adafruit_CharLCD(lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lcd_d7,
                                lcd_columns, lcd_rows, lcd_backlight)
+    logger.debug('(DONE) initializing lcd module')
 except:
-    print_log("ERROR WHILE INITIALISING RFID MODULE" + str(sys.exc_info()))
+    logger.error("error while initialising rfid module: {}".format(str(sys.exc_info())))
 
 
 def print_lcd(s):
     try:
         hw_acq("lcd print")
+        logger.debug('updating LCD display text to: {}'.format(s))
         lcd.clear()
         lcd.message(s)
     except:
-        print_log("ERROR MESSAGING ON LCD" + str(sys.exc_info()))
+        logger.error("error messaging on lcd: {}".format(str(sys.exc_info())))
     finally:
         hw_rel("lcd print")

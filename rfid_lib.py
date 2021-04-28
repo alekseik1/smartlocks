@@ -2,21 +2,25 @@ RFID_ERR_CODE = 228
 TIMEOUT_CODE = 42
 
 from threading import Thread
-from time import *
+from time import sleep
 
-from client import *
-from door import *
-from hw_lock import *
-from lcd_lib import *
+from loguru import logger
+from client import allowed_to_unlock, get_ip
+from door import door_open, door_close
+from hw_lock import hw_lock, hw_acq, hw_rel
+from lcd_lib import print_lcd
+import sys
 
 try:
     from pirc522 import RFID
     import RPi.GPIO
     from time import clock
 
+    logger.debug('init RFID module')
     rdr = RFID(pin_rst=1, pin_irq=0, pin_mode=RPi.GPIO.BCM)
+    logger.debug('(DONE) init RFID module')
 except:
-    print_log("ERROR INITIALISING RFID MODULE: " + str(sys.exc_info()))
+    logger.critical("error initialising rfid module: {}".format(str(sys.exc_info())))
 
 
 def wait_card(timeout=-1):
@@ -25,28 +29,33 @@ def wait_card(timeout=-1):
     uid = []
     try:
         while err:
+            _ = clock()
             hw_acq("rfid read")
             (err, tt) = rdr.request()
             if not err:
                 (err, uid) = rdr.anticoll()
+            logger.debug(f'rfid found card: {tt} with error {err}')
+            if tt is not None:
+                return err, uid
             if timeout > 0 and clock() - start_time > timeout:
                 break
-                err = TIMEOUT_CODE
             hw_rel("rfid read")
-            sleep(0.1)
+            logger.debug('rfid read took: {} seconds'.format(clock() - _), 'debug')
+            sleep(2)
         return err, uid
     except:
-        print_log("ERROR IN RFID MODULE: " + str(sys.exc_info()))
-        print_lcd("RFID MODULE\n ERROR")
+        logger.critical("error in rfid module: {}".format(str(sys.exc_info())))
         hw_lock.release()
         return RFID_ERR_CODE, uid
 
 
 def rfid_cleanup():
+    logger.info('starting')
     try:
         rdr.cleanup()
+        logger.info('done')
     except:
-        print_log("RFID CLEANUP ERROR: " + str(sys.exc_info()))
+        logger.error("rfid cleanup error: {}".format(str(sys.exc_info())))
 
 
 def uid_to_str(uid):
@@ -62,8 +71,10 @@ def uid_to_str(uid):
 
 class rfid_thread(Thread):
     def __init__(self):
+        logger.debug('init RFID thread')
         Thread.__init__(self)
         self.name = "rfid thread"
+        logger.debug('(DONE) init RFID thread')
 
     def run(self):
         last_uid = []
@@ -79,11 +90,11 @@ class rfid_thread(Thread):
             try:
 
                 same_uid_counter = (same_uid_counter + 1) * int(uid == last_uid)
-                print_log(">->->->->RFID EVENT<-<-<-<-<")
-                print_log(uid_to_str(uid))
+                uid_str = uid_to_str(uid)
+                logger.info("processing detected card: {}".format(uid_str))
 
-                status, cause = allowed_to_unlock(uid_to_str(uid))
-                print_log("got result to unlock: " + str(status) + " " + str(cause))
+                status, cause = allowed_to_unlock(uid_str)
+                logger.info("got result to unlock: {} {}".format(str(status), str(cause)))
                 if status:
                     if cause == "admin":
                         print_lcd(get_ip())
@@ -94,6 +105,7 @@ class rfid_thread(Thread):
                     else:
                         print_lcd("YOU ARE WELCOME")
                     door_open()
+                    # TODO: заправить на TIMEOUT
                     sleep(3)
                     door_close()
                 else:
@@ -114,11 +126,12 @@ class rfid_thread(Thread):
                     elif same_uid_counter > 5:
                         print_lcd("ACCESS DENIED")
                     sleep(1.5)
-                print_log("<-<-<-<-<RFID EVENT>->->->->\n")
+                logger.info("(DONE) processing detected card: {}".format(uid_str))
 
             except:
                 door_open()
-                print_log("ERROR in rfig thread")
+                logger.error("error in rfig thread")
+                # TODO: заправить на TIMEOUT
                 sleep(3)
                 door_close()
 

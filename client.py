@@ -1,16 +1,15 @@
-import datetime
 import time
 import json
 import random
-import string
+import datetime
 from subprocess import check_output
 from threading import Thread
 
 import requests
 
-from http_lib import *
-from lcd_lib import *
-from log_writing import *
+from http_lib import lst
+from lcd_lib import print_lcd
+from loguru import logger
 
 config = {}
 
@@ -21,83 +20,86 @@ def get_ip():
 
 def configure(filename):
     try:
+        logger.info(f'reading config: {filename}')
         with open(filename) as f:
             data = json.load(f)
+        logger.debug(f'read data: {data}')
         if (data.get(u'url_unlock') == None) or (data.get(u'url_upd') == None):
-            raise Exception('Invalid content of config file')
-    except:
+            raise ValueError('Invalid content of config file')
+    except Exception as e:
+        logger.critical(f'error processing config: {e}')
         print_lcd('Configuration error')
-        print_log("Error processing config file: " + str(sys.exc_info()))
-        print_log("Continuing working in an old way")
     else:
         global config
         config = data
         print_lcd('Configured')
-        print_log("New configuration: " + str(config))
+        logger.debug(f"new configuration: {config}")
 
 
 def allowed_by_server(uid):
+    logger.info(f'checking if {uid} is allow by server')
     try:
         global config, ser1, ser2, ser3
         url = config[u'url_unlock'] + uid
+        logger.info(f'requesting server URL={url}')
         r = requests.get(url)
-        print_log('Unlock request:' + str(url))
-        print_log('response status code: ' + str(r.status_code))
-        print_log(r.text)
+        logger.info(f'got response {r.status_code} with text: {r.text}')
 
         if r.status_code != 200:
-            raise Exception('Server error')
-        if (r.text == 'yes'):
-            return (True, "not_defined")
-        if (r.text == "no"):
-            return (False, "not_defined")
+            raise requests.HTTPError('Server error')
+        # Legacy server answers
+        if r.text == 'yes':
+            return True, "not_defined"
+        if r.text == "no":
+            return False, "not_defined"
 
         resp = json.loads(r.text)
-        print_log("name: " + resp["name"])
+        logger.info(f"name: {resp['name']}")
+        logger.info(f'(DONE) checking if {uid} is allow by server')
         if resp["status"] == "yes":
-            return (True, resp["cause"])
+            return True, resp["cause"]
         else:
-            return (False, resp["cause"])
+            return False, resp["cause"]
 
-    except:
+    except requests.RequestException as e:
+        logger.error(f'request error: {e}')
         print_lcd('Network error')
-        print_log("Error asking server to unlock: " + str(sys.exc_info()))
-        print_log("Continuing working")
-    return (False, "error")
+        return False, "error"
 
 
 def allowed_by_list(uid):
-    print_log("Asking list")
     try:
+        logger.info("loading local access_list.txt")
         with open('access_list.txt') as f:
             data = json.load(f, object_hook=date_hook)
+        logger.info("(DONE) loading local access_list.txt")
 
         for o in data:
             if (o['uid'] == uid) \
                     and (o['date_start'].date() == datetime.date.today()) \
                     and (o['time_start'].time() <= datetime.datetime.now().time()) \
                     and (o['time_end'].time() >= datetime.datetime.now().time()):
-                print_log("access granted")
-                print_log("name: " + o["name"])
+                logger.info(f"found access record for name: {o['name']}")
                 return True
-    except:
+    except OSError as e:
         print_lcd('Database error')
-        print_log("Error processing access list: " + str(sys.exc_info()))
+        logger.error("error processing access list: {e}")
         update_list()
-    print_log("no access")
+    logger.info("fallback to default no access")
     return False
 
 
 def allowed_by_admin(uid):
     try:
+        logger.info(f'looking up uid={uid} in admin list')
         with open('admin_uid.txt', 'rb') as f:
             for line in f:
                 if uid == line[:-1]:
-                    print_log("Welcome, Admin Adminovich")
+                    logger.info(f'found uid={uid} in admin list!')
                     return True
-    except:
+    except IOError as e:
         print_lcd('Local error')
-        print_log("Error processing admin list" + str(sys.exc_info()))
+        logger.error(f"error processing admin list {e}")
     return False
 
 
@@ -108,32 +110,34 @@ def allowed_by_random(p):
 
 
 def read_one_time_set():
-    print_log("reading one time set")
     try:
-        f = open("one_time_set", "rb")
-        res = set(json.load(f))
-        f.close()
-        print_log("reading ok")
+        logger.info("loading one time set")
+        with open("one_time_set", "rb") as f:
+            res = set(json.load(f))
+        logger.info("(DONE) loading one time set")
         return res
-    except:
-        print_log("one time set reading falure " + str(sys.exc_info()))
+    except IOError as e:
+        logger.error(f"one time set reading failure: {e}")
         return set()
 
 
 def write_one_time_set(set):
-    print_log("writing one time set")
     try:
-        f = open("one_time_set", "wb")
-        json.dump(list(set), f)
-        print_log("writing ok")
-    except:
-        print_log("writing failed " + str(sys.exc_info()))
+        logger.info("writing one time set")
+        with open("one_time_set", "wb") as f:
+            json.dump(list(set), f)
+        logger.info("(DONE) writing one time set")
+    except IOError as e:
+        logger.error(f"writing failed: {e}")
 
 
 def allowed_to_unlock(uid):
-    if uid in lst: return (True, "because")
+    logger.info(f'checking if allowed to unlock, uid={uid}')
+    if uid in lst:
+        return True, "because"
     if allowed_by_admin(uid):
-        return (True, "admin")
+        logger.info('allowed, is admin')
+        return True, "admin"
 
     one_time_set = read_one_time_set()
 
@@ -141,24 +145,29 @@ def allowed_to_unlock(uid):
         if not uid in one_time_set:
             one_time_set.add(uid)
             write_one_time_set(one_time_set)
-        return (True, "list")
+        logger.info('allowed, in one-time list')
+        return True, "list"
 
     status, cause = allowed_by_server(uid)
     if status:
         if not uid in one_time_set:
             one_time_set.add(uid)
             write_one_time_set(one_time_set)
-        return (True, cause)
+        logger.info(f'allowed, server response: {cause}')
+        return True, cause
 
     if uid in one_time_set:
         one_time_set.remove(uid)
         write_one_time_set(one_time_set)
-        return (True, "last_time")
+        logger.info(f'allowed, last enter')
+        return True, "last_time"
 
     if allowed_by_random(0.05):
-        return (True, "random")
+        logger.info(f'allowed, by random :)')
+        return True, "random"
 
-    return (False, cause)
+    logger.info(f'denied, fallback')
+    return False, cause
 
 
 def date_hook(json_dict):
@@ -175,38 +184,46 @@ def date_hook(json_dict):
 
 
 def update_list():
+    logger.info('trying to update access list from server')
     try:
         global config
         url = config[u'url_upd']
+        logger.debug(f'sending request to {url}')
         r = requests.get(url)
-        print_log('Update request:' + url)
-        print_log('response status code: ' + str(r.status_code))
+        logger.debug(f'got response: {r.status_code}')
         if r.status_code != 200:
-            raise Exception('Server error')
+            raise requests.HTTPError('Server error')
+        logger.info('successfully fetched access list from server')
         data_str = r.text.replace('\'', '\"')
         data = json.loads(r.text, object_hook=date_hook)
+        logger.info('writing server response to access_list.txt')
         with open('access_list.txt', 'w') as f:
             f.write(data_str)
-        print_log("Access list successfully updated")
+        logger.info('(DONE) writing server response to access_list.txt')
         return data
-    except:
+    except requests.RequestException as e:
         print_lcd('Network error')
-        print_log("Error asking server to update: " + str(sys.exc_info()))
-        print_log("Continuing working")
+        logger.error(f"error asking server to update: {e}")
+    except KeyError as e:
+        logger.error(f'{e}')
+    except Exception as e:
+        logger.critical(f'unknown exception: {e}')
     return None
 
 
 class update_thread(Thread):
     def __init__(self):
+        logger.debug('init access_list update thread')
         Thread.__init__(self)
         self.name = "list update thread"
+        logger.debug('(DONE) init access list update thread')
 
     def run(self):
         configure("config.txt")
         while 1:
-            print_log(">->->->->LIST UPDATE EVENT<-<-<-<-<")
+            logger.info("calling access list update")
             update_list()
-            print_log("<-<-<-<-<LIST UPDATE EVENT>->->->->\n")
+            logger.info("(DONE) calling access list update")
             time.sleep(15 * 60)
 
 

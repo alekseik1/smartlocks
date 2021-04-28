@@ -4,38 +4,45 @@ import RPi.GPIO as GPIO
 import time
 
 from door import door_open, door_close
-from log_writing import print_log
+from loguru import logger
 
 GPIO.setmode(GPIO.BCM)
 
 BUTTON_PIN = 12
+TIMEOUT = 3
 
 
 def button_handler(channel):
+    logger.info('[function] opening door for {} seconds'.format(TIMEOUT))
     door_open()
-    time.sleep(3)
+    time.sleep(TIMEOUT)
     door_close()
+    logger.info('(DONE) [function] opening door for {} seconds'.format(TIMEOUT))
 
 
 def button_init():
+    logger.debug('init button')
     GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.add_event_detect(BUTTON_PIN, GPIO.RISING, callback=button_handler, bouncetime=100)
+    logger.debug('(DONE) init button')
 
 
 class button_thread(Thread):
 
     def __init__(self):
+        logger.debug('init button thread')
         Thread.__init__(self)
         GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        logger.debug('(DONE) init button thread')
 
     def run(self):
         while 1:
             GPIO.wait_for_edge(BUTTON_PIN, GPIO.RISING)
-            print_log(">->->->->BUTTON PRESSED EVENT<-<-<-<-<")
+            logger.info('[thread] opening door for {} seconds'.format(TIMEOUT))
             door_open()
-            time.sleep(3)
+            time.sleep(TIMEOUT)
             door_close()
-            print_log("<-<-<-<-<BUTTON PRESSED EVENT>->->->->\n")
+            logger.info('(DONE) [thread] opening door for {} seconds'.format(TIMEOUT))
 
 
 button_thr = button_thread()

@@ -1,6 +1,6 @@
 import threading
 
-from log_writing import print_log
+from loguru import logger
 
 hw_lock = threading.Lock()
 
@@ -8,12 +8,14 @@ DEBUG_ON_ = False
 
 
 def hw_acq(s=''):
+    logger.debug('acquiring lock with reason: {}'.format(s))
     global hw_lock, DEBUG_ON_
     hw_lock.acquire()
-    if DEBUG_ON_: print_log("hw mutex acqired: " + s)
+    logger.debug('(DONE) acquiring lock with reason: {}'.format(s))
 
 
 def hw_rel(s=''):
+    logger.debug('releasing lock taken by: {}'.format(s))
     global hw_lock, DEBUG_ON_
     hw_lock.release()
-    if DEBUG_ON_: print_log("hw mutex released: " + s)
+    logger.debug('(DONE) releasing lock taken by: {}'.format(s))
