@@ -23,10 +23,24 @@ except:
     logger.critical("error initialising rfid module: {}".format(str(sys.exc_info())))
 
 
+def rfid_reset(rfid: RFID):
+    # See: https://github.com/mxgxw/MFRC522-python/blob/master/MFRC522.py
+    COMMAND_REG = 0x01
+    PCD_RESETPHASE = 0x0F
+    logger.debug('sending RFID reset signal')
+    hw_acq('rfid reset')
+    rfid.dev_write(COMMAND_REG, PCD_RESETPHASE)
+    sleep(1)
+    rfid.init()
+    hw_rel('rfid reset')
+    logger.debug('(DONE) sending RFID reset signal')
+
+
 def wait_card(timeout=-1):
     err = 1
     start_time = clock()
     uid = []
+    i = 0
     try:
         while err:
             _ = clock()
@@ -41,7 +55,12 @@ def wait_card(timeout=-1):
             if timeout > 0 and clock() - start_time > timeout:
                 break
             logger.debug('rfid read took: {} seconds'.format(clock() - _), 'debug')
-            sleep(2)
+            i += 1
+            if i % 60 == 0:
+                # HACK: periodically reset RFID
+                rfid_reset(rdr)
+                i = 0
+            sleep(1)
         return err, uid
     except:
         logger.critical("error in rfid module: {}".format(str(sys.exc_info())))
