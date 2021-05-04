@@ -7,8 +7,6 @@ rdr = RFID(
     pin_irq=0,
     pin_mode=GPIO.BCM
 )
-rdr.init()
-rdr.set_antenna(True)
 
 try:
     while True:
@@ -25,3 +23,4 @@ try:
 except KeyboardInterrupt:
     print('Finishing')
     rdr.cleanup()
+    GPIO.cleanup()

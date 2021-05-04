@@ -8,8 +8,8 @@ from threading import Thread
 import requests
 
 from http_lib import lst
-from lcd_lib import print_lcd
 from loguru import logger
+from device_manager import manager
 
 config = {}
 
@@ -28,7 +28,7 @@ def configure(filename):
             raise ValueError('Invalid content of config file')
     except Exception as e:
         logger.critical(f'error processing config: {e}')
-        print_lcd('Configuration error')
+        manager.lcd_display.print_lcd('Configuration error')
     else:
         global config
         config = data
@@ -62,7 +62,7 @@ def allowed_by_server(uid):
 
     except requests.RequestException as e:
         logger.error(f'request error: {e}')
-        print_lcd('Network error')
+        manager.lcd_display.print_lcd('Network error')
         return False, "error"
 
 
@@ -81,7 +81,7 @@ def allowed_by_list(uid):
                 logger.info(f"found access record for name: {o['name']}")
                 return True
     except OSError as e:
-        print_lcd('Database error')
+        manager.lcd_display.print_lcd('Database error')
         logger.error("error processing access list: {e}")
         update_list()
     logger.info("fallback to default no access")
@@ -97,7 +97,7 @@ def allowed_by_admin(uid):
                     logger.info(f'found uid={uid} in admin list!')
                     return True
     except IOError as e:
-        print_lcd('Local error')
+        manager.lcd_display.print_lcd('Local error')
         logger.error(f"error processing admin list {e}")
     return False
 
@@ -201,7 +201,7 @@ def update_list():
         logger.info('(DONE) writing server response to access_list.txt')
         return data
     except requests.RequestException as e:
-        print_lcd('Network error')
+        manager.lcd_display.print_lcd('Network error')
         logger.error(f"error asking server to update: {e}")
     except KeyError as e:
         logger.error(f'{e}')
