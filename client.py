@@ -41,7 +41,11 @@ def allowed_by_server(uid):
         global config, ser1, ser2, ser3
         url = config[u'url_unlock'] + uid
         logger.info(f'requesting server URL={url}')
-        r = requests.get(url)
+        proxies = config.get('proxies', {})
+        if proxies:
+            r = requests.get(url, proxies=proxies)
+        else:
+            r = requests.get(url)
         logger.info(f'got response {r.status_code} with text: {r.text}')
 
         if r.status_code != 200:
@@ -188,7 +192,11 @@ def update_list():
         global config
         url = config[u'url_upd']
         logger.debug(f'sending request to {url}')
-        r = requests.get(url)
+        proxies = config.get('proxies', {})
+        if proxies:
+            r = requests.get(url, proxies=proxies)
+        else:
+            r = requests.get(url)
         logger.debug(f'got response: {r.status_code}')
         if r.status_code != 200:
             raise requests.HTTPError('Server error')
