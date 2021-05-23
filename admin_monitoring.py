@@ -15,8 +15,16 @@ async def open_admin_request(secret_token: str):
     if secret_token != SECRET_TOKEN:
         logger.info('received incorrect token')
         return HTTPException(status_code=403, detail="Incorrect token")
-    # TODO: закрыть дверь потом
     manager.door_magnet.open()
+    return 'ok'
+
+
+@app.get('/door/close')
+async def close_admin_request(secret_token: str):
+    if secret_token != SECRET_TOKEN:
+        logger.info('received incorrect token')
+        return HTTPException(status_code=403, detail="Incorrect token")
+    manager.door_magnet.close()
     return 'ok'
 
 
