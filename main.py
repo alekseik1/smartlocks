@@ -10,7 +10,7 @@ from rfid_lib import rfid_thr
 from loguru import logger
 from device_manager import manager
 
-logger.add('logs/log_{time}.log', rotation=datetime.timedelta(days=1))
+logger.add('logs/log_{time}.log', rotation=datetime.timedelta(days=1), level='INFO')
 
 logger.info('setting up GPIO mode')
 GPIO.setmode(GPIO.BCM)
