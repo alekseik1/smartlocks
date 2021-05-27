@@ -95,9 +95,9 @@ def allowed_by_list(uid):
 def allowed_by_admin(uid):
     try:
         logger.info(f'looking up uid={uid} in admin list')
-        with open('admin_uid.txt', 'rb') as f:
+        with open('admin_uid.txt', 'r') as f:
             for line in f:
-                if uid == line[:-1]:
+                if uid == line.split()[0]:
                     logger.info(f'found uid={uid} in admin list!')
                     return True
     except IOError as e:
