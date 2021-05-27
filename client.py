@@ -15,7 +15,7 @@ config = {}
 
 
 def get_ip():
-    return check_output(['hostname', '--all-ip-addresses'])
+    return check_output(['hostname', '--all-ip-addresses']).decode('utf-8')
 
 
 def configure(filename):
