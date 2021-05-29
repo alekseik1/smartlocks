@@ -29,6 +29,7 @@ class UsesLock:
 class DoorMagnet(UsesLock):
     FREEZE_AFTER_CLOSE = 2
     MAGNET_PIN = 5
+    is_opened: bool = False
 
     def __init__(self, lock: Lock):
         super().__init__(lock)
@@ -40,13 +41,17 @@ class DoorMagnet(UsesLock):
 
     @logger_wraps()
     def open(self):
-        with self.acquire_lock():
-            self._set_state(0)
+        if not self.is_opened:
+            with self.acquire_lock():
+                self._set_state(0)
+                self.is_opened = True
 
     @logger_wraps()
     def close(self):
-        with self.acquire_lock(release_delay=DoorMagnet.FREEZE_AFTER_CLOSE):
-            self._set_state(1)
+        if self.is_opened:
+            with self.acquire_lock(release_delay=DoorMagnet.FREEZE_AFTER_CLOSE):
+                self._set_state(1)
+                self.is_opened = False
 
 
 class LcdDisplay(UsesLock):
