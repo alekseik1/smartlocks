@@ -18,12 +18,17 @@ logger.info('(DONE) setting up GPIO mode')
 
 try:
     DEBUG_ON_ = False
+    RUN_SERVER = True
     logger.info("initializing threads")
     manager.door_magnet.close()
     update_thr.start()
     # Сильно жрет ЦПУ
     rfid_thr.start()
     button_thr.start()
+    if RUN_SERVER:
+        import uvicorn
+        from admin_monitoring import app
+        uvicorn.run(app, host='0.0.0.0', port=8085)
 except:
     manager.lcd_display.print_lcd("ERR: MAIN LOOP\n EXCEPTION")
     logger.critical("main loop exception: {}".format(sys.exc_info()))
