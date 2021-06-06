@@ -1,0 +1,15 @@
+[Unit]
+Description=Lock
+After=multi-user.target
+
+[Service]
+Type=idle
+PIDFile=/var/run/smartlock.pid
+# Environment="LOGURU_LEVEL=INFO"
+WorkingDirectory=/home/pi/smartlocks
+ExecStart=/usr/bin/python3 main.py &
+ExecStop=/bin/kill -s SIGINT -$MAINPID
+
+
+[Install]
+WantedBy=multi-user.target
