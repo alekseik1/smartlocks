@@ -8,7 +8,8 @@ from dotenv import load_dotenv
 app = FastAPI()
 load_dotenv()
 
-SECRET_TOKEN = os.environ.get('SECRET_BOT_TOKEN')
+SECRET_TOKEN = os.environ['SECRET_BOT_TOKEN']
+logger.debug(f'secret token is: {SECRET_TOKEN}')
 
 
 async def close_door_after_delay(delay_seconds: int):
@@ -21,6 +22,7 @@ async def open_admin_request(secret_token: str, background_tasks: BackgroundTask
     if secret_token != SECRET_TOKEN:
         logger.info('received incorrect token')
         return HTTPException(status_code=403, detail="Incorrect token")
+    logger.debug(f'received door open signal with correct token: {secret_token}, openning')
     manager.door_magnet.open()
     background_tasks.add_task(close_door_after_delay, delay_seconds=10)
     return 'ok'
