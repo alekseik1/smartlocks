@@ -22,7 +22,8 @@ async def open_admin_request(secret_token: str, background_tasks: BackgroundTask
     if secret_token != SECRET_TOKEN:
         logger.info('received incorrect token')
         return HTTPException(status_code=403, detail="Incorrect token")
-    logger.debug(f'received door open signal with correct token: {secret_token}, openning')
+    logger.debug(f'token: {secret_token}')
+    logger.info(f'received door open signal with correct token, opening')
     manager.door_magnet.open()
     background_tasks.add_task(close_door_after_delay, delay_seconds=10)
     return 'ok'
