@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import os
 import sys
 
 import RPi.GPIO as GPIO
@@ -9,8 +10,19 @@ from client import update_thr
 from rfid_lib import rfid_thr
 from loguru import logger
 from device_manager import manager
+from pygelf import GelfTcpHandler
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
 
 logger.add('logs/log_{time}.log', rotation=datetime.timedelta(days=1), retention=30, level='INFO')
+# Send logs to a remote server
+if 'REMOTE_SYSLOG_IP' in os.environ:
+    logger.add(GelfTcpHandler(host=os.environ['REMOTE_SYSLOG_IP'], port=os.environ['REMOTE_SYSLOG_PORT']), level='INFO')
+else:
+    logger.warning('no REMOTE_SYSLOG_IP configured, will write logs only to STDOUT and logs/log_*.log')
 
 logger.info('setting up GPIO mode')
 GPIO.setmode(GPIO.BCM)
