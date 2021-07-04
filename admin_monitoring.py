@@ -1,15 +1,18 @@
-import os
 import asyncio
-from device_manager import manager
-from loguru import logger
-from fastapi import FastAPI, HTTPException, BackgroundTasks
+import os
+
 from dotenv import load_dotenv
+from fastapi import BackgroundTasks, FastAPI, HTTPException
+from loguru import logger
+
+from device_manager import DeviceManager
 
 app = FastAPI()
+manager = DeviceManager()
 load_dotenv()
 
-SECRET_TOKEN = os.environ['SECRET_BOT_TOKEN']
-logger.debug(f'secret token is: {SECRET_TOKEN}')
+SECRET_TOKEN = os.environ["SECRET_BOT_TOKEN"]
+logger.debug(f"secret token is: {SECRET_TOKEN}")
 
 
 async def close_door_after_delay(delay_seconds: int):
@@ -17,27 +20,28 @@ async def close_door_after_delay(delay_seconds: int):
     manager.door_magnet.close()
 
 
-@app.get('/door/open')
+@app.get("/door/open")
 async def open_admin_request(secret_token: str, background_tasks: BackgroundTasks):
     if secret_token != SECRET_TOKEN:
-        logger.info('received incorrect token')
+        logger.info("received incorrect token")
         return HTTPException(status_code=403, detail="Incorrect token")
-    logger.debug(f'token: {secret_token}')
-    logger.info(f'received door open signal with correct token, opening')
+    logger.debug(f"token: {secret_token}")
+    logger.info(f"received door open signal with correct token, opening")
     manager.door_magnet.open()
     background_tasks.add_task(close_door_after_delay, delay_seconds=10)
-    return 'ok'
+    return "ok"
 
 
-@app.get('/door/close')
+@app.get("/door/close")
 async def close_admin_request(secret_token: str):
     if secret_token != SECRET_TOKEN:
-        logger.info('received incorrect token')
+        logger.info("received incorrect token")
         return HTTPException(status_code=403, detail="Incorrect token")
     manager.door_magnet.close()
-    return 'ok'
+    return "ok"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host='0.0.0.0', port=8085)
+
+    uvicorn.run(app, host="0.0.0.0", port=8085)
