@@ -20,6 +20,11 @@ async def close_door_after_delay(delay_seconds: int):
     manager.door_magnet.close()
 
 
+async def change_text(delay_seconds: int):
+    await asyncio.sleep(delay_seconds)
+    manager.lcd_display.print_lcd("PLACE CARD \n ON READER")
+
+
 @app.get("/door/open")
 async def open_admin_request(secret_token: str, background_tasks: BackgroundTasks):
     if secret_token != SECRET_TOKEN:
@@ -28,7 +33,9 @@ async def open_admin_request(secret_token: str, background_tasks: BackgroundTask
     logger.debug(f"token: {secret_token}")
     logger.info(f"received door open signal with correct token, opening")
     manager.door_magnet.open()
+    manager.lcd_display.print_lcd("HACKING DETECTED\nopening door")
     background_tasks.add_task(close_door_after_delay, delay_seconds=10)
+    background_tasks.add_task(change_text, delay_seconds=3)
     return "ok"
 
 
