@@ -39,6 +39,11 @@ async def open_admin_request(secret_token: str, background_tasks: BackgroundTask
     return "ok"
 
 
+@app.get("/health_check")
+async def say_alive():
+    return "ok"
+
+
 @app.get("/door/close")
 async def close_admin_request(secret_token: str):
     if secret_token != SECRET_TOKEN:
