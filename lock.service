@@ -4,6 +4,7 @@ After=multi-user.target
 
 [Service]
 Type=idle
+Restart=always
 PIDFile=/var/run/smartlock.pid
 # Environment="LOGURU_LEVEL=INFO"
 WorkingDirectory=/home/pi/smartlocks

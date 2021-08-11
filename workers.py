@@ -1,3 +1,5 @@
+import os
+import signal
 import time
 from threading import Thread
 
@@ -87,11 +89,9 @@ class RfidThread(Thread):
                 logger.info("(DONE) processing detected card: {}".format(uid_str))
 
             except Exception as e:
-                self.device_manager.door_magnet.open()
                 logger.error(f"error in rfig thread {e}")
-                # TODO: заправить на TIMEOUT
-                time.sleep(3)
-                self.device_manager.door_magnet.close()
+                self.device_manager.door_magnet.open()
+                os.kill(os.getpid(), signal.SIGINT)
 
 
 class ButtonThread(Thread):
