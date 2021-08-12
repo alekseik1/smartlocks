@@ -153,7 +153,7 @@ class RfidReader(UsesLock):
                     rfid_reset(rdr)
                     i = 0
                 """
-                time.sleep(1)
+                # time.sleep(1)
             return err, uid
         except:
             logger.critical("error in rfid module: {}".format(str(sys.exc_info())))
