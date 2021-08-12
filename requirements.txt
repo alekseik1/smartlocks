@@ -1,3 +1,4 @@
+adafruit-circuitpython-charlcd
 loguru
 python-dotenv
 fastapi
