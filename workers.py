@@ -7,6 +7,13 @@ from loguru import logger
 from RPi import GPIO
 
 from client import allowed_to_unlock, configure, get_ip, update_list
+from constants import (
+    MESSAGE_LAST_ENTER,
+    MESSAGE_LUCKY,
+    MESSAGE_NO_REGISTRATION,
+    MESSAGE_PLACE_CARD,
+    MESSAGE_WELCOME,
+)
 from device_manager import DeviceManager
 
 
@@ -25,7 +32,7 @@ class RfidThread(Thread):
         same_uid_counter = 0
         last_uid = None
         while True:
-            self.device_manager.lcd_display.print_lcd("PLACE CARD \n ON READER")
+            self.device_manager.lcd_display.print_lcd(MESSAGE_PLACE_CARD)
 
             err, uid = self.device_manager.rfid_reader.wait_card()
             try:
@@ -42,13 +49,11 @@ class RfidThread(Thread):
                     if cause == "admin":
                         self.device_manager.lcd_display.print_lcd(get_ip())
                     elif cause == "last_time":
-                        self.device_manager.lcd_display.print_lcd(
-                            "IT IS YOUR\n LAST ENTER"
-                        )
+                        self.device_manager.lcd_display.print_lcd(MESSAGE_LAST_ENTER)
                     elif cause == "random":
-                        self.device_manager.lcd_display.print_lcd("SO LUCKY TODAY")
+                        self.device_manager.lcd_display.print_lcd(MESSAGE_LUCKY)
                     else:
-                        self.device_manager.lcd_display.print_lcd("YOU ARE WELCOME")
+                        self.device_manager.lcd_display.print_lcd(MESSAGE_WELCOME)
                     self.device_manager.door_magnet.open()
                     # TODO: TIMEOUT as separate variable
                     time.sleep(3)
@@ -56,7 +61,7 @@ class RfidThread(Thread):
                 else:
                     if cause == "unknown_user":
                         self.device_manager.lcd_display.print_lcd(
-                            "please register\n your card"
+                            MESSAGE_NO_REGISTRATION
                         )
                     elif same_uid_counter == 0:
                         self.device_manager.lcd_display.print_lcd(
