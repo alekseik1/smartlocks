@@ -5,6 +5,7 @@ from threading import Thread
 from time import sleep
 
 from loguru import logger
+
 from client import allowed_to_unlock, get_ip
 from device_manager import manager
 
@@ -16,10 +17,10 @@ def uid_to_str(uid):
 
 class rfid_thread(Thread):
     def __init__(self):
-        logger.debug('init RFID thread')
+        logger.debug("init RFID thread")
         Thread.__init__(self)
         self.name = "rfid thread"
-        logger.debug('(DONE) init RFID thread')
+        logger.debug("(DONE) init RFID thread")
 
     def run(self):
         last_uid = []
@@ -39,7 +40,9 @@ class rfid_thread(Thread):
                 logger.info("processing detected card: {}".format(uid_str))
 
                 status, cause = allowed_to_unlock(uid_str)
-                logger.info("got result to unlock: {} {}".format(str(status), str(cause)))
+                logger.info(
+                    "got result to unlock: {} {}".format(str(status), str(cause))
+                )
                 if status:
                     if cause == "admin":
                         manager.lcd_display.print_lcd(get_ip())
@@ -65,7 +68,9 @@ class rfid_thread(Thread):
                     elif same_uid_counter == 3:
                         manager.lcd_display.print_lcd("access denied\nwhat's now?!")
                     elif same_uid_counter == 4:
-                        manager.lcd_display.print_lcd("ACCESS DENIED!!!\nplease go away:(")
+                        manager.lcd_display.print_lcd(
+                            "ACCESS DENIED!!!\nplease go away:("
+                        )
                     elif same_uid_counter == 5:
                         manager.lcd_display.print_lcd("goodbye _|___|_\n /(^_^)/")
                     elif same_uid_counter > 5:
