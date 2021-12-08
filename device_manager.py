@@ -30,7 +30,7 @@ class UsesLock:
 
 class DoorMagnet(UsesLock):
     FREEZE_AFTER_CLOSE = 2
-    MAGNET_PIN = 5
+    MAGNET_PIN = 21
     is_opened: bool = False
 
     def __init__(self, lock: Lock):
