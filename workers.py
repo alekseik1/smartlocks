@@ -100,7 +100,7 @@ class RfidThread(Thread):
 
 
 class ButtonThread(Thread):
-    BUTTON_PIN = 12
+    BUTTON_PIN = 16
     TIMEOUT = 3
 
     def __init__(self, device_manager: DeviceManager):

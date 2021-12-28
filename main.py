@@ -52,6 +52,9 @@ try:
     rfid_thread = RfidThread(device_manager=manager)
     rfid_thread.setDaemon(True)
     logger.info(3)
+    # NOTE BCM нога 20 всегда будет в 1, чтобы кнопка работала
+    GPIO.setup(20, GPIO.OUT)
+    GPIO.output(20, GPIO.HIGH)
     button_thread = ButtonThread(device_manager=manager)
     button_thread.setDaemon(True)
     for thread in [rfid_thread, button_thread, update_thread]:
