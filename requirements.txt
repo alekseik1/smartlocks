@@ -1,8 +1,8 @@
+adafruit-circuitpython-charlcd
 loguru
 python-dotenv
 fastapi
 uvicorn
 RPi.GPIO
-timeloop
 pygelf
 pi-rc522

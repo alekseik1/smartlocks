@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 from loguru import logger
 
+from constants import MESSAGE_OPEN_BY_BOT, MESSAGE_PLACE_CARD
 from device_manager import DeviceManager
 
 app = FastAPI()
@@ -22,7 +23,7 @@ async def close_door_after_delay(delay_seconds: int):
 
 async def change_text(delay_seconds: int):
     await asyncio.sleep(delay_seconds)
-    manager.lcd_display.print_lcd("PLACE CARD \n ON READER")
+    manager.lcd_display.print_lcd(MESSAGE_PLACE_CARD)
 
 
 @app.get("/door/open")
@@ -33,7 +34,7 @@ async def open_admin_request(secret_token: str, background_tasks: BackgroundTask
     logger.debug(f"token: {secret_token}")
     logger.info(f"received door open signal with correct token, opening")
     manager.door_magnet.open()
-    manager.lcd_display.print_lcd("HACKING DETECTED\nopening door")
+    manager.lcd_display.print_lcd(MESSAGE_OPEN_BY_BOT)
     background_tasks.add_task(close_door_after_delay, delay_seconds=10)
     background_tasks.add_task(change_text, delay_seconds=3)
     return "ok"

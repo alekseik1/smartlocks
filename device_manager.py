@@ -30,7 +30,7 @@ class UsesLock:
 
 class DoorMagnet(UsesLock):
     FREEZE_AFTER_CLOSE = 2
-    MAGNET_PIN = 5
+    MAGNET_PIN = 21
     is_opened: bool = False
 
     def __init__(self, lock: Lock):
@@ -60,14 +60,23 @@ class DoorMagnet(UsesLock):
 
 class LcdDisplay(UsesLock):
 
+    # Hand override
+    lcd_rs = 2
+    lcd_en = 4
+    lcd_d4 = 3
+    lcd_d5 = 15
+    lcd_d6 = 14
+    lcd_d7 = 18
+    lcd_backlight = 17
+
     # Raspberry Pi pin configuration:
-    lcd_rs = 25
-    lcd_en = 24
-    lcd_d4 = 23
-    lcd_d5 = 17
-    lcd_d6 = 18
-    lcd_d7 = 22
-    lcd_backlight = 4
+    # lcd_rs = 25
+    # lcd_en = 24
+    # lcd_d4 = 23
+    # lcd_d5 = 17
+    # lcd_d6 = 18
+    # lcd_d7 = 22
+    # lcd_backlight = 4
 
     # Define LCD column and row size for 16x2 LCD.
     lcd_columns = 16
@@ -116,7 +125,7 @@ class RfidReader(UsesLock):
     def __init__(self, lock: Lock):
         super().__init__(lock)
         logger.debug("init RFID module")
-        self.rdr = RFID(pin_rst=1, pin_irq=0, pin_mode=GPIO.BCM)
+        self.rdr = RFID(pin_rst=25, pin_irq=24, pin_mode=GPIO.BCM)
         logger.debug("(DONE) init RFID module")
 
     @logger_wraps()
@@ -126,11 +135,11 @@ class RfidReader(UsesLock):
         # i = 0
         try:
             while err:
+                self.rdr.wait_for_tag()
                 _ = time.clock()
-                with self.acquire_lock():
-                    (err, tt) = self.rdr.request()
-                    if not err:
-                        (err, uid) = self.rdr.anticoll()
+                (err, tt) = self.rdr.request()
+                if not err:
+                    (err, uid) = self.rdr.anticoll()
                 logger.debug(f"rfid found card: {tt} with error {err}")
                 if tt is not None:
                     return err, uid
@@ -144,7 +153,7 @@ class RfidReader(UsesLock):
                     rfid_reset(rdr)
                     i = 0
                 """
-                time.sleep(1)
+                # time.sleep(1)
             return err, uid
         except:
             logger.critical("error in rfid module: {}".format(str(sys.exc_info())))
