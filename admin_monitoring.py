@@ -42,7 +42,6 @@ async def open_admin_request(secret_token: str, background_tasks: BackgroundTask
 
 @app.get("/health_check")
 async def say_alive():
-    logger.info("health check request, answering 'ok'")
     return "ok"
 
 
