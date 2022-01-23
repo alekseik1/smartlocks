@@ -19,7 +19,12 @@ from device_manager import DeviceManager
 
 def uid_to_str(uid):
     # MIFARE CLASSIC
-    return str(uid[0]) + "." + str(uid[1]) + "." + str(uid[2]) + "." + str(uid[3])
+    try:
+        return str(uid[0]) + "." + str(uid[1]) + "." + str(uid[2]) + "." + str(uid[3])
+    except Exception as e:
+        rv = "9.9.9.9"
+        logger.warning(f"incorrect UID={uid}, with error={e} returning {rv}")
+        return rv
 
 
 class RfidThread(Thread):
