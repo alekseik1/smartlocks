@@ -7,6 +7,7 @@ from loguru import logger
 from RPi import GPIO
 
 from client import allowed_to_unlock, configure, get_ip, update_list
+from fpmi_client import allowed_to_unlock as fpmi_allowed_to_unlock
 from constants import (
     MESSAGE_LAST_ENTER,
     MESSAGE_LUCKY,
@@ -46,10 +47,16 @@ class RfidThread(Thread):
                 uid_str = uid_to_str(uid)
                 logger.info("processing detected card: {}".format(uid_str))
 
+                status_1, cause_1 = fpmi_allowed_to_unlock(uid_str)
+                if status_1:
+                    logger.info("status_1 IS TRUE, OPENING")
                 status, cause = allowed_to_unlock(uid_str)
                 logger.info(
                     "got result to unlock: {} {}".format(str(status), str(cause))
                 )
+                # один из них должен ответить "Да"
+                status = status_1 or status
+                # на cause вообще похер пока
                 if status:
                     if cause == "admin":
                         self.device_manager.lcd_display.print_lcd(get_ip())
