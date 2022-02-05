@@ -38,7 +38,9 @@ def allowed_to_unlock(uid_str):
     """
     # convert to hex format
     logger.debug(f"converting {uid_str} to hex")
-    hex_uid = ''.join([hex(int(x))[2:].upper() for x in uid_str.split('.')])
+
+    card_1, card_2, card_3, card_4 = [int(i) for i in uid_str.split('.')]
+    hex_uid = f"{format(card_1, '02x').upper()}{format(card_2, '02x').upper()}{format(card_3, '02x').upper()}{format(card_4, '02x').upper()}"
     logger.debug(f"converting {hex_uid} to hash")
     uid_hash = enhash_rfid_card_id(hex_uid)
     logger.debug(f"requesting {API_SERVER} to unlock")
