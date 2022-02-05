@@ -45,19 +45,14 @@ try:
     manager.door_magnet.close()
     logger.info("initializing threads")
     # Сильно жрет ЦПУ
-    logger.info(1)
-    update_thread = ListUpdateThread()
-    update_thread.setDaemon(True)
-    logger.info(2)
     rfid_thread = RfidThread(device_manager=manager)
     rfid_thread.setDaemon(True)
-    logger.info(3)
     # NOTE BCM нога 20 всегда будет в 1, чтобы кнопка работала
     GPIO.setup(20, GPIO.OUT)
     GPIO.output(20, GPIO.HIGH)
     button_thread = ButtonThread(device_manager=manager)
     button_thread.setDaemon(True)
-    for thread in [rfid_thread, button_thread, update_thread]:
+    for thread in [rfid_thread, button_thread]:
         logger.info(thread.name)
         thread.start()
     if RUN_SERVER:

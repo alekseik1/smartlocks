@@ -50,7 +50,9 @@ class RfidThread(Thread):
                 status_1, cause_1 = fpmi_allowed_to_unlock(uid_str)
                 if status_1:
                     logger.info("status_1 IS TRUE, OPENING")
-                status, cause = allowed_to_unlock(uid_str)
+                # status, cause = allowed_to_unlock(uid_str)
+                # УБИРАЕМ проверку от старого сервера
+                status, cause = False, 'some message'
                 logger.info(
                     "got result to unlock: {} {}".format(str(status), str(cause))
                 )
