@@ -28,6 +28,17 @@ def uid_to_str(uid):
         return rv
 
 
+def hardcoded_allowed_to_unlock(uid_str):
+    try:
+        with open("admin_uid.txt", "r") as f:
+            for line in f.readlines():
+                if uid_str == line.split()[0].strip():
+                    return True
+    except FileNotFoundError as e:
+        logger.error(f"File admin_uid.txt not found, returning False. Error: {e}")
+    return False
+
+
 class RfidThread(Thread):
     def __init__(self, device_manager: DeviceManager):
         Thread.__init__(self)
@@ -51,8 +62,8 @@ class RfidThread(Thread):
                 if status_1:
                     logger.info("status_1 IS TRUE, OPENING")
                 # status, cause = allowed_to_unlock(uid_str)
-                # УБИРАЕМ проверку от старого сервера
-                status, cause = False, 'some message'
+                # УБИРАЕМ проверку от старого сервера, только хардкоденный список
+                status, cause = hardcoded_allowed_to_unlock(uid_str), 'admin'
                 logger.info(
                     "got result to unlock: {} {}".format(str(status), str(cause))
                 )
