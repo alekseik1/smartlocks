@@ -48,6 +48,10 @@ class RfidThread(Thread):
     def run(self) -> None:
         same_uid_counter = 0
         last_uid = None
+        def _error_handle(e):
+            logger.error(f"error in rfig thread {e}")
+            self.device_manager.door_magnet.open()
+            os.kill(os.getpid(), signal.SIGINT)
         while True:
             self.device_manager.lcd_display.print_lcd(MESSAGE_PLACE_CARD)
 
@@ -57,10 +61,18 @@ class RfidThread(Thread):
                     same_uid_counter += 1
                 uid_str = uid_to_str(uid)
                 logger.info("processing detected card: {}".format(uid_str))
+            except Exception as e:
+                _error_handle(e)
+                break
 
+            try:
                 status_1, cause_1 = fpmi_allowed_to_unlock(uid_str)
                 if status_1:
                     logger.info("status_1 IS TRUE, OPENING")
+            except Exception as e:
+                _error_handle(e)
+                break
+            try:
                 # status, cause = allowed_to_unlock(uid_str)
                 # УБИРАЕМ проверку от старого сервера, только хардкоденный список
                 status, cause = hardcoded_allowed_to_unlock(uid_str), 'admin'
@@ -69,6 +81,10 @@ class RfidThread(Thread):
                 )
                 # один из них должен ответить "Да"
                 status = status_1 or status
+            except Exception as e:
+                _error_handle(e)
+                break
+            try:
                 # на cause вообще похер пока
                 if status:
                     if cause == "admin":
@@ -119,9 +135,7 @@ class RfidThread(Thread):
                 logger.info("(DONE) processing detected card: {}".format(uid_str))
 
             except Exception as e:
-                logger.error(f"error in rfig thread {e}")
-                self.device_manager.door_magnet.open()
-                os.kill(os.getpid(), signal.SIGINT)
+                _error_handle(e)
 
 
 class ButtonThread(Thread):
