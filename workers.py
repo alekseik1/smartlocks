@@ -66,13 +66,6 @@ class RfidThread(Thread):
                 break
 
             try:
-                status_1, cause_1 = fpmi_allowed_to_unlock(uid_str)
-                if status_1:
-                    logger.info("status_1 IS TRUE, OPENING")
-            except Exception as e:
-                _error_handle(e)
-                break
-            try:
                 # status, cause = allowed_to_unlock(uid_str)
                 # УБИРАЕМ проверку от старого сервера, только хардкоденный список
                 status, cause = hardcoded_allowed_to_unlock(uid_str), 'admin'
@@ -80,10 +73,19 @@ class RfidThread(Thread):
                     "got result to unlock: {} {}".format(str(status), str(cause))
                 )
                 # один из них должен ответить "Да"
-                status = status_1 or status
             except Exception as e:
                 _error_handle(e)
                 break
+            if not status:
+                # если не админ, то делаем проверку на ФПМИ-сервер
+                try:
+                    status_1, cause_1 = fpmi_allowed_to_unlock(uid_str)
+                    if status_1:
+                        logger.info("status_1 IS TRUE, OPENING")
+                    status = status_1
+                except Exception as e:
+                    _error_handle(e)
+                    break
             try:
                 # на cause вообще похер пока
                 if status:
