@@ -5,7 +5,7 @@ import requests
 
 # TODO соль в конфиг
 SALT = "BDD8ED61A39C9DC8062383B862A56457C27F095BFBEF1F40F6F3BAC97368DBC3"
-API_SERVER = "https://stfpmi.mipt.ru/api"
+API_SERVER = "https://stfpmi.ru/api"
 # TODO токен в .env
 """
 Для 5Б: 4388c9f38310d2dba25cbb5f0d4c0b8c9d96909d855d882beee91084203e0525
@@ -44,7 +44,7 @@ def allowed_to_unlock(uid_str):
     logger.debug(f"converting {hex_uid} to hash")
     uid_hash = enhash_rfid_card_id(hex_uid)
     logger.debug(f"requesting {API_SERVER} to unlock")
-    r = requests.post(f'{API_SERVER}/lock', json={'token': TOKEN, 'card_id': uid_hash})
+    r = requests.post(f'{API_SERVER}/lock', json={'token': TOKEN, 'card_id': uid_hash}, timeout=10)
     if r.status_code != 200:
         logger.info(f"DENIED на карту {hex_uid}")
         return False, "no_orders"
