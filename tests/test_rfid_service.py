@@ -21,3 +21,9 @@ def test_rfid_okay(mock_rpi, mocker):
                         main()
     r_mock.assert_called()
     assert r_mock.call_args[0] == (f"http://localhost:{CONTROL_PORT}/unlock",)
+
+
+def test_hardcoded_list(mock_rpi):
+    from rfid_service.daemon import hardcoded_allowed_to_unlock
+
+    hardcoded_allowed_to_unlock("2.2.2.2")

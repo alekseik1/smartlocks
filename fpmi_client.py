@@ -6,7 +6,7 @@ from loguru import logger
 
 # TODO соль в конфиг
 SALT = "BDD8ED61A39C9DC8062383B862A56457C27F095BFBEF1F40F6F3BAC97368DBC3"
-API_SERVER = "https://stfpmi.ru/api"
+API_SERVER = "https://stfpmi.mipt.ru/api"
 # TODO токен в .env
 """
 Для 5Б: 4388c9f38310d2dba25cbb5f0d4c0b8c9d96909d855d882beee91084203e0525
@@ -45,6 +45,7 @@ def allowed_to_unlock(uid_str):
     Возвращает кортеж из соображений совместимости со старым сайтом.
     """
     # convert to hex format
+    return False, ""
     logger.debug(f"converting {uid_str} to hex")
 
     card_1, card_2, card_3, card_4 = [int(i) for i in uid_str.split(".")]

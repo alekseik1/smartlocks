@@ -21,11 +21,8 @@
         - "log_utils.py"
         - "fpmi_client.py"
         - "device_manager.py"
-    - name: copy .env file
-      copy:
-        src: "{{ playbook_dir }}/..//../.env"
-        dest: /home/pi/smartlocks/
-        decrypt: true
+        - ".env"
+        - "admin_uid.txt"
     - name: copy systemd units
       become: true
       copy:

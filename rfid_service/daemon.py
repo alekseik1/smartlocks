@@ -24,16 +24,16 @@ def uid_to_str(uid):
 
 
 def hardcoded_allowed_to_unlock(uid_str):
-    file = "admin_uid.txt"
+    file_ = basedir.parent / "admin_uid.txt"
     try:
-        with open(file, "r") as f:
+        with open(file_, "r") as f:
             for line in f.readlines():
                 if uid_str == line.split()[0].strip():
                     return True
     except FileNotFoundError as e:
-        logger.error(f"File {file} not found, returning False. Error: {e}")
+        logger.error(f"File {file_} not found, returning False. Error: {e}")
     except IndexError as e:
-        logger.error(f"File {file} is corrupted, returning False. Error: {e}")
+        logger.error(f"File {file_} is corrupted, returning False. Error: {e}")
     return False
 
 

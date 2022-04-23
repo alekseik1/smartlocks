@@ -1,10 +1,11 @@
+import time
 from pathlib import Path
 
 import requests
 from dotenv import load_dotenv
 from loguru import logger
 
-from door_service.daemon import CONTROL_PORT
+from door_service.daemon import CONTROL_PORT, OPEN_TIME
 from log_utils import setup_logger
 
 basedir = Path(__file__).parent
@@ -27,6 +28,7 @@ def main():
                 logger.debug("request completed successfully")
             elif r.status_code == 400:
                 logger.warning(f"button request was not success, text={r.text}")
+        time.sleep(OPEN_TIME)
 
 
 if __name__ == "__main__":
