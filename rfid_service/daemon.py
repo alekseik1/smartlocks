@@ -32,7 +32,7 @@ def hardcoded_allowed_to_unlock(uid_str):
     return False
 
 
-if __name__ == "__main__":
+def main():
     rfid_reader = RfidReader(Lock())
     while True:
         err, uid = rfid_reader.wait_card()
@@ -54,3 +54,7 @@ if __name__ == "__main__":
             if r.status_code != 200:
                 logger.error(f"open request error, text={r.text}")
         logger.info("(DONE) processing detected card: {}".format(uid_str))
+
+
+if __name__ == "__main__":
+    main()
