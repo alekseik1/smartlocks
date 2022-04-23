@@ -1,7 +1,8 @@
 import hashlib
-from loguru import logger
-import requests
+import os
 
+import requests
+from loguru import logger
 
 # TODO соль в конфиг
 SALT = "BDD8ED61A39C9DC8062383B862A56457C27F095BFBEF1F40F6F3BAC97368DBC3"
@@ -17,6 +18,13 @@ API_SERVER = "https://stfpmi.ru/api"
 # TOKEN = "7cf97feb2ab1939918c92043ef6dfe34428844a51c7ceee94f90b44549c286a4"  # это дев
 # TODO итерации в конфиг
 NUM_ITERATIONS = 3
+
+
+def my_number():
+    with open("/my_number", "r") as f:
+        # 5 - 5Б, 6 - 6Б
+        # положите файлик на каждый замок
+        return f.read().strip()
 
 
 def enhash_rfid_card_id(card_id):
@@ -39,12 +47,19 @@ def allowed_to_unlock(uid_str):
     # convert to hex format
     logger.debug(f"converting {uid_str} to hex")
 
-    card_1, card_2, card_3, card_4 = [int(i) for i in uid_str.split('.')]
+    card_1, card_2, card_3, card_4 = [int(i) for i in uid_str.split(".")]
     hex_uid = f"{format(card_1, '02x').upper()}{format(card_2, '02x').upper()}{format(card_3, '02x').upper()}{format(card_4, '02x').upper()}"
     logger.debug(f"converting {hex_uid} to hash")
     uid_hash = enhash_rfid_card_id(hex_uid)
     logger.debug(f"requesting {API_SERVER} to unlock")
-    r = requests.post(f'{API_SERVER}/lock', json={'token': TOKEN, 'card_id': uid_hash}, timeout=10)
+    r = requests.post(
+        f"{API_SERVER}/lock",
+        json={
+            "token": os.environ.get(f"FPMI_TOKEN_{my_number()}"),
+            "card_id": uid_hash,
+        },
+        timeout=10,
+    )
     if r.status_code != 200:
         logger.info(f"DENIED на карту {hex_uid}")
         return False, "no_orders"
@@ -52,5 +67,5 @@ def allowed_to_unlock(uid_str):
     return True, "success"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(allowed_to_unlock("170.187.204.221"))
