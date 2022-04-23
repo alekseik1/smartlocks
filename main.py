@@ -11,6 +11,7 @@ from pygelf import GelfTcpHandler
 
 from device_manager import DeviceManager
 from workers import ButtonThread, ListUpdateThread, RfidThread
+from fpmi_client import my_number
 
 load_dotenv()
 
@@ -25,7 +26,7 @@ logger.add(
 if "REMOTE_SYSLOG_IP" in os.environ:
     logger.add(
         GelfTcpHandler(
-            host=os.environ["REMOTE_SYSLOG_IP"], port=os.environ["REMOTE_SYSLOG_PORT"]
+            host=os.environ["REMOTE_SYSLOG_IP"], port=os.environ[f"REMOTE_SYSLOG_PORT_{my_number()}"]
         ),
         level="INFO",
     )
