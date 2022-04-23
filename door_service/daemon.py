@@ -62,10 +62,11 @@ async def health_check(request: Request):
 
 
 def handle_queue(queue: Queue):
-    # from multiprocessing import Lock
+    from multiprocessing import Lock
 
-    # from device_manager import DoorMagnet
-    # door_magnet = DoorMagnet(Lock())
+    from device_manager import DoorMagnet
+
+    door_magnet = DoorMagnet(Lock())
     while True:
         try:
             command = queue.get(block=True)
@@ -74,11 +75,11 @@ def handle_queue(queue: Queue):
             logger.error("queue is closed")
             raise
         if command == 1:
-            # door_magnet.open()
+            door_magnet.open()
             time.sleep(OPEN_TIME)
         elif command == 0:
             ...
-            # door_magnet.close()
+            door_magnet.close()
         elif command is None:
             logger.info("health check command")
         time.sleep(0.1)
