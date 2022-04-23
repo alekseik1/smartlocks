@@ -1,4 +1,4 @@
-from multiprocessing import Lock
+from threading import Lock
 
 import requests
 from loguru import logger

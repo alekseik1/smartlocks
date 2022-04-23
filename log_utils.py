@@ -24,17 +24,21 @@ def logger_wraps(*, entry=True, exit=True, level="DEBUG"):
     return wrapper
 
 
-def setup_logger():
+def setup_logger(prefix=""):
     import datetime
     import os
 
     from pygelf import GelfTcpHandler
 
+    os.environ["REMOTE_SYSLOG_IP"] = "10.55.229.127"
+    os.environ["REMOTE_SYSLOG_PORT"] = "12201"
+
     logger.add(
-        "logs/log_{time}.log",
+        "logs/%slog_{time}.log" % (prefix,),
         rotation=datetime.timedelta(days=1),
         retention=30,
         level="INFO",
+        enqueue=True,
     )
     # Send logs to a remote server
     if "REMOTE_SYSLOG_IP" in os.environ:
@@ -44,6 +48,7 @@ def setup_logger():
                 port=os.environ["REMOTE_SYSLOG_PORT"],
             ),
             level="INFO",
+            enqueue=True,
         )
     else:
         logger.warning(

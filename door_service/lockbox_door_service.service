@@ -1,0 +1,15 @@
+[Unit]
+Description=Main door service for lockbox
+After=multi-user.target
+
+[Service]
+Type=idle
+PIDFile=/run/lockbox_main.pid
+# Environment="LOGURU_LEVEL=INFO"
+Environment="PYTHONPATH=/home/pi/smartlocks/"
+WorkingDirectory=/home/pi/smartlocks/door_service
+ExecStart=/usr/bin/python3 daemon.py &
+ExecStop=/bin/kill -s SIGINT $MAINPID
+
+[Install]
+WantedBy=multi-user.target

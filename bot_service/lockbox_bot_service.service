@@ -1,0 +1,15 @@
+[Unit]
+Description=Chat-bot support for lockbox
+After=multi-user.target lockbox_door_service.service
+
+[Service]
+Type=idle
+PIDFile=/run/lockbox_chatbot.pid
+# Environment="LOGURU_LEVEL=INFO"
+Environment="PYTHONPATH=/home/pi/smartlocks/"
+WorkingDirectory=/home/pi/smartlocks/bot_service
+ExecStart=/usr/bin/python3 daemon.py &
+ExecStop=/bin/kill -s SIGINT $MAINPID
+
+[Install]
+WantedBy=multi-user.target

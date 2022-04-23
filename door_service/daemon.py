@@ -1,10 +1,10 @@
+import os
 import time
 from multiprocessing import Process, Queue
 from queue import Full
 
 import uvicorn
 from fastapi import APIRouter, FastAPI, HTTPException
-from loguru import logger
 from starlette.requests import Request
 
 from log_utils import setup_logger
@@ -21,6 +21,9 @@ def create_app(queue) -> FastAPI:
 
 
 def run_app(queue, port: int = 5050):
+    from loguru import logger
+
+    setup_logger(prefix="api_")
     uvicorn.run(create_app(queue), port=port)
 
 
@@ -64,7 +67,10 @@ async def health_check(request: Request):
 
 
 def handle_queue(queue: Queue):
-    from multiprocessing import Lock
+    from loguru import logger
+
+    setup_logger(prefix="queue_")
+    from threading import Lock
 
     from device_manager import DoorMagnet
 
@@ -88,7 +94,6 @@ def handle_queue(queue: Queue):
 
 
 if __name__ == "__main__":
-    setup_logger()
     queue = Queue()
     p_server = Process(target=run_app, args=(queue, CONTROL_PORT))
     p_worker = Process(target=handle_queue, args=(queue,))
