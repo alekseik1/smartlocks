@@ -52,14 +52,18 @@ def allowed_to_unlock(uid_str):
     logger.debug(f"converting {hex_uid} to hash")
     uid_hash = enhash_rfid_card_id(hex_uid)
     logger.debug(f"requesting {API_SERVER} to unlock")
-    r = requests.post(
-        f"{API_SERVER}/lock",
-        json={
-            "token": os.environ.get(f"FPMI_TOKEN_{my_number()}"),
-            "card_id": uid_hash,
-        },
-        timeout=10,
-    )
+    try:
+        r = requests.post(
+            f"{API_SERVER}/lock",
+            json={
+                "token": os.environ.get(f"FPMI_TOKEN_{my_number()}"),
+                "card_id": uid_hash,
+            },
+            timeout=10,
+        )
+    except Exception as e:
+        logger.error(f"error while requesting FPMI: {e}")
+        return False, "failed"
     if r.status_code != 200:
         logger.info(f"DENIED на карту {hex_uid}")
         return False, "no_orders"
