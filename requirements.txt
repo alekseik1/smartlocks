@@ -1,9 +1,12 @@
-adafruit-circuitpython-charlcd==3.3.13
+# adafruit-circuitpython-charlcd==3.3.13
 loguru==0.6.0
 python-dotenv==0.20.0
 fastapi==0.75.2
 uvicorn==0.17.6
-RPi.GPIO==0.7.1
+# RPi.GPIO==0.7.1
 requests==2.27.1
 pygelf==0.4.2
-pi-rc522==2.2.1
+# pi-rc522==2.2.1
+mock.gpio==0.1.8
+pytest==7.1.1
+pytest-mock==3.7.0
