@@ -7,6 +7,8 @@ from fastapi import APIRouter, FastAPI, HTTPException
 from loguru import logger
 from starlette.requests import Request
 
+from log_utils import setup_logger
+
 OPEN_TIME = 5  # На сколько открывать, в секундах
 CONTROL_PORT = 5050  # порт, на котором будут слушаться команды открытия
 
@@ -86,6 +88,7 @@ def handle_queue(queue: Queue):
 
 
 if __name__ == "__main__":
+    setup_logger()
     queue = Queue()
     p_server = Process(target=run_app, args=(queue, CONTROL_PORT))
     p_worker = Process(target=handle_queue, args=(queue,))

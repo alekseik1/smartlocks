@@ -6,6 +6,7 @@ from loguru import logger
 from device_manager import RfidReader
 from door_service.daemon import CONTROL_PORT
 from fpmi_client import allowed_to_unlock as fpmi_allowed_to_unlock
+from log_utils import setup_logger
 
 
 def uid_to_str(uid):
@@ -57,4 +58,5 @@ def main():
 
 
 if __name__ == "__main__":
+    setup_logger()
     main()

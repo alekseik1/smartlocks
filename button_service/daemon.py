@@ -2,6 +2,7 @@ import requests
 from loguru import logger
 
 from door_service.daemon import CONTROL_PORT
+from log_utils import setup_logger
 
 
 def main():
@@ -23,4 +24,5 @@ def main():
 
 
 if __name__ == "__main__":
+    setup_logger()
     main()
