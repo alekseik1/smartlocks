@@ -1,0 +1,37 @@
+---
+- name: deploy everything
+  hosts: zamok5
+  vars:
+    services:
+      - bot_service
+      - button_service
+      - door_service
+      - rfid_service
+  tasks:
+    - name: copy files
+      copy:
+        src: "{{ playbook_dir }}/../../{{ item }}/"
+        dest: "/home/pi/smartlocks/{{ item }}/"
+      loop: "{{ services }}"
+    - name: copy non-templated files
+      copy:
+        src: "{{ playbook_dir }}/../../{{ item }}"
+        dest: /home/pi/smartlocks/
+      loop:
+        - "log_utils.py"
+        - "fpmi_client.py"
+        - "device_manager.py"
+    - name: copy systemd units
+      become: true
+      copy:
+        src: "/home/pi/smartlocks/{{ item }}/lockbox_{{ item }}.service"
+        dest: /etc/systemd/system/
+        remote_src: true
+      loop: "{{ services }}"
+    - name: start services
+      become: true
+      systemd:
+        daemon_reload: true
+        name: "lockbox_{{ item }}"
+        state: restarted
+      loop: "{{ services }}"
