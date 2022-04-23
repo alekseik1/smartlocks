@@ -1,12 +1,16 @@
+from pathlib import Path
 from threading import Lock
 
 import requests
+from dotenv import load_dotenv
 from loguru import logger
 
 from device_manager import RfidReader
 from door_service.daemon import CONTROL_PORT
 from fpmi_client import allowed_to_unlock as fpmi_allowed_to_unlock
 from log_utils import setup_logger
+
+basedir = Path(__file__).parent
 
 
 def uid_to_str(uid):
@@ -58,5 +62,6 @@ def main():
 
 
 if __name__ == "__main__":
+    load_dotenv(basedir.parent / ".env")
     setup_logger()
     main()

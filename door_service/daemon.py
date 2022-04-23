@@ -1,13 +1,17 @@
 import os
 import time
 from multiprocessing import Process, Queue
+from pathlib import Path
 from queue import Full
 
 import uvicorn
+from dotenv import load_dotenv
 from fastapi import APIRouter, FastAPI, HTTPException
 from starlette.requests import Request
 
 from log_utils import setup_logger
+
+basedir = Path(__file__).parent
 
 OPEN_TIME = 5  # На сколько открывать, в секундах
 CONTROL_PORT = 5050  # порт, на котором будут слушаться команды открытия
@@ -23,6 +27,7 @@ def create_app(queue) -> FastAPI:
 def run_app(queue, port: int = 5050):
     from loguru import logger
 
+    load_dotenv(basedir.parent / ".env")
     setup_logger(prefix="api_")
     uvicorn.run(create_app(queue), port=port)
 
@@ -69,6 +74,7 @@ async def health_check(request: Request):
 def handle_queue(queue: Queue):
     from loguru import logger
 
+    load_dotenv(basedir.parent / ".env")
     setup_logger(prefix="queue_")
     from threading import Lock
 

@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import requests
 import uvicorn
@@ -10,6 +11,7 @@ from door_service.daemon import CONTROL_PORT
 from log_utils import setup_logger
 
 app = FastAPI()
+basedir = Path(__file__).parent
 
 
 @app.get("/door/open")
@@ -34,7 +36,7 @@ async def say_alive():
 
 if __name__ == "__main__":
     setup_logger()
-    load_dotenv()
+    load_dotenv(basedir.parent / ".env")
     SECRET_TOKEN = os.environ["SECRET_BOT_TOKEN"]
     logger.debug(f"secret token is: {SECRET_TOKEN}")
     uvicorn.run(app, host="0.0.0.0", port=8085)
