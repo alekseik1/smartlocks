@@ -8,6 +8,7 @@ from log_utils import setup_logger
 def main():
     from RPi import GPIO
 
+    GPIO.setmode(GPIO.BCM)
     GPIO.setup(20, GPIO.OUT)
     GPIO.output(20, GPIO.HIGH)
     BUTTON_PIN = 16
