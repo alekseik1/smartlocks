@@ -1,4 +1,5 @@
 *.paw
 *.pyc
 *.txt
+.env
 http_lib.py
